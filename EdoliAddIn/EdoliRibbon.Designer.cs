@@ -44,6 +44,7 @@
             this.endArrowSizeDown = this.Factory.CreateRibbonButton();
             this.connectShapeByLine = this.Factory.CreateRibbonButton();
             this.trimImage = this.Factory.CreateRibbonButton();
+            this.SVGTool = this.Factory.CreateRibbonButton();
             this.alignGroup = this.Factory.CreateRibbonGroup();
             this.labelBottom = this.Factory.CreateRibbonButton();
             this.labelTop = this.Factory.CreateRibbonButton();
@@ -109,6 +110,7 @@
             this.shape.Items.Add(this.endArrowSizeDown);
             this.shape.Items.Add(this.connectShapeByLine);
             this.shape.Items.Add(this.trimImage);
+            this.shape.Items.Add(this.SVGTool);
             this.shape.Label = "Shape";
             this.shape.Name = "shape";
             // 
@@ -197,6 +199,17 @@
             this.trimImage.ShowLabel = false;
             this.trimImage.SuperTip = "Trim blank area of images";
             this.trimImage.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.trimImage_Click);
+            // 
+            // SVGTool
+            // 
+            this.SVGTool.Image = global::EdoliAddIn.Properties.Resources.icon_image_trim;
+            this.SVGTool.Label = "Trim";
+            this.SVGTool.Name = "SVGTool";
+            this.SVGTool.ScreenTip = "Trim Image";
+            this.SVGTool.ShowImage = true;
+            this.SVGTool.ShowLabel = false;
+            this.SVGTool.SuperTip = "Trim blank area of images";
+            this.SVGTool.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.SVGTool_Click);
             // 
             // alignGroup
             // 
@@ -608,6 +621,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton followAnimation;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton alignLines;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton trimLines;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton SVGTool;
     }
 
     partial class ThisRibbonCollection

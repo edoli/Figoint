@@ -165,5 +165,10 @@ namespace EdoliAddIn
         {
             AnimationTool.FollowAnimation();
         }
+
+        private void SVGTool_Click(object sender, RibbonControlEventArgs e)
+        {
+            SVGtoPPTParser.AddSVGFigureFromClipboard();
+        }
     }
 }
