@@ -3,6 +3,7 @@ using Microsoft.Office.Core;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
@@ -315,16 +316,22 @@ namespace EdoliAddIn
             }
         }
 
+        public static Expression GenerateExpression(string expression)
+        {
+            expression = Regex.Replace(expression, @"(?<![a-zA-Z])t(?![a-zA-Z(\[])(?!\s*\()", "[t]");
+            return new Expression(expression, ExpressiveOptions.IgnoreCaseForParsing);
+        }
+
         public static void AddPathOfExpression(string expX, string expY, string startValue, string endValue, bool isCurve)
         {
             float startValueEvaluated = Convert.ToSingle(new Expression(startValue, ExpressiveOptions.IgnoreCaseForParsing).Evaluate());
             float endValueEvaluated = Convert.ToSingle(new Expression(endValue, ExpressiveOptions.IgnoreCaseForParsing).Evaluate());
 
-            expX = expX == "" ? "[t]" : expX;
-            expY = expY == "" ? "[t]" : expY;
+            expX = expX == "" ? "t" : expX;
+            expY = expY == "" ? "t" : expY;
 
-            var expressiveX = new Expression(expX, ExpressiveOptions.IgnoreCaseForParsing);
-            var expressiveY = new Expression(expY, ExpressiveOptions.IgnoreCaseForParsing);
+            var expressiveX = GenerateExpression(expX);
+            var expressiveY = GenerateExpression(expY);
             var shape = AddPathOfFunction(t => {
                 var dict = new Dictionary<string, object> { ["t"] = t };
                 return new Vector2(Convert.ToSingle(expressiveX.Evaluate(dict)),
@@ -357,13 +364,7 @@ namespace EdoliAddIn
                 var points = pointsShape.points;
                 var shape = isCurve ? slide.Shapes.AddCurve(points) : slide.Shapes.AddPolyline(points);
                 shape.Select();
-
-                if (Globals.Ribbons.EdoliRibbon.checkBoxNormalizeEqShape.Checked)
-                {
-                    float scale = 64 / pointsShape.width;
-                    shape.ScaleWidth(scale, MsoTriState.msoFalse, MsoScaleFrom.msoScaleFromMiddle);
-                    shape.ScaleHeight(scale, MsoTriState.msoFalse, MsoScaleFrom.msoScaleFromMiddle);
-                }
+                
                 return shape;
             }
             catch (Exception ex)
@@ -377,11 +378,11 @@ namespace EdoliAddIn
             float startValueEvaluated = Convert.ToSingle(new Expression(startValue, ExpressiveOptions.IgnoreCaseForParsing).Evaluate());
             float endValueEvaluated = Convert.ToSingle(new Expression(endValue, ExpressiveOptions.IgnoreCaseForParsing).Evaluate());
 
-            expX = expX == "" ? "[t]" : expX;
-            expY = expY == "" ? "[t]" : expY;
+            expX = expX == "" ? "t" : expX;
+            expY = expY == "" ? "t" : expY;
 
-            var expressiveX = new Expression(expX, ExpressiveOptions.IgnoreCaseForParsing);
-            var expressiveY = new Expression(expY, ExpressiveOptions.IgnoreCaseForParsing);
+            var expressiveX = GenerateExpression(expX);
+            var expressiveY = GenerateExpression(expY);
             var shape = UpdatePathOfFunction(t => {
                 var dict = new Dictionary<string, object> { ["t"] = t };
                 return new Vector2(Convert.ToSingle(expressiveX.Evaluate(dict)),
@@ -413,11 +414,10 @@ namespace EdoliAddIn
                     {
                         bool isCurve = tag == CurveTag;
                         var vectors = PathOfFunction(func, startValue, endValue, isCurve);
-                        var center = shape.Position(ShapeExt.Anchor.Center);
-                        var pointsShape = new PointsShape(vectors, center.X, center.Y);
+                        var pointsShape = new PointsShape(vectors, 0f, 0f);
                         var points = pointsShape.points;
 
-                        // Method 1 (Not working)
+                        // Method 1 (Too slow, Not working)
                         // int nodeCount = shape.Nodes.Count;
                         // for (int i = 0; i < nodeCount; i++)
                         // {
@@ -428,13 +428,14 @@ namespace EdoliAddIn
                         // }
 
                         // Method 2
-                        shape.Delete();
-                        
                         var newShape = isCurve ? slide.Shapes.AddCurve(points) : slide.Shapes.AddPolyline(points);
+                        
+                        newShape.Match(shape, true);
                         newShape.Tags.Add(PathTypeTagName, tag);
                         newShape.Select();
+                        shape.Delete();
 
-                        return shape;
+                        return newShape;
                     }
                     catch (Exception ex)
                     {

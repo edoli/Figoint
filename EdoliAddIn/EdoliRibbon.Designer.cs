@@ -71,8 +71,6 @@
             this.polylineOfEquation = this.Factory.CreateRibbonButton();
             this.curveStart = this.Factory.CreateRibbonEditBox();
             this.curveEnd = this.Factory.CreateRibbonEditBox();
-            this.checkBoxNormalizeEqShape = this.Factory.CreateRibbonCheckBox();
-            this.box2 = this.Factory.CreateRibbonBox();
             this.curveOfEquationX = this.Factory.CreateRibbonEditBox();
             this.curveOfEquationY = this.Factory.CreateRibbonEditBox();
             this.animationGroup = this.Factory.CreateRibbonGroup();
@@ -84,7 +82,6 @@
             this.groupGrid.SuspendLayout();
             this.equationGroup.SuspendLayout();
             this.box1.SuspendLayout();
-            this.box2.SuspendLayout();
             this.animationGroup.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -435,7 +432,8 @@
             // equationGroup
             // 
             this.equationGroup.Items.Add(this.box1);
-            this.equationGroup.Items.Add(this.box2);
+            this.equationGroup.Items.Add(this.curveOfEquationX);
+            this.equationGroup.Items.Add(this.curveOfEquationY);
             this.equationGroup.Label = "Equation";
             this.equationGroup.Name = "equationGroup";
             // 
@@ -445,7 +443,6 @@
             this.box1.Items.Add(this.polylineOfEquation);
             this.box1.Items.Add(this.curveStart);
             this.box1.Items.Add(this.curveEnd);
-            this.box1.Items.Add(this.checkBoxNormalizeEqShape);
             this.box1.Name = "box1";
             // 
             // curveOfEquation
@@ -491,26 +488,14 @@
             this.curveEnd.Text = "1";
             this.curveEnd.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
             // 
-            // checkBoxNormalizeEqShape
-            // 
-            this.checkBoxNormalizeEqShape.Label = "Norm";
-            this.checkBoxNormalizeEqShape.Name = "checkBoxNormalizeEqShape";
-            this.checkBoxNormalizeEqShape.ScreenTip = "Normalize Shape";
-            this.checkBoxNormalizeEqShape.SuperTip = "Normalize the shape of the equation curve";
-            // 
-            // box2
-            // 
-            this.box2.Items.Add(this.curveOfEquationX);
-            this.box2.Items.Add(this.curveOfEquationY);
-            this.box2.Name = "box2";
-            // 
             // curveOfEquationX
             // 
             this.curveOfEquationX.Label = "X";
             this.curveOfEquationX.Name = "curveOfEquationX";
             this.curveOfEquationX.ScreenTip = "X Equation";
+            this.curveOfEquationX.SizeString = "000000000000000000";
             this.curveOfEquationX.SuperTip = "Enter the equation for the X coordinate";
-            this.curveOfEquationX.Text = "[t]";
+            this.curveOfEquationX.Text = "t";
             this.curveOfEquationX.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
             // 
             // curveOfEquationY
@@ -518,8 +503,9 @@
             this.curveOfEquationY.Label = "Y";
             this.curveOfEquationY.Name = "curveOfEquationY";
             this.curveOfEquationY.ScreenTip = "Y Equation";
+            this.curveOfEquationY.SizeString = "000000000000000000";
             this.curveOfEquationY.SuperTip = "Enter the equation for the Y coordinate";
-            this.curveOfEquationY.Text = "[t]";
+            this.curveOfEquationY.Text = "t";
             this.curveOfEquationY.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
             // 
             // animationGroup
@@ -566,8 +552,6 @@
             this.equationGroup.PerformLayout();
             this.box1.ResumeLayout(false);
             this.box1.PerformLayout();
-            this.box2.ResumeLayout(false);
-            this.box2.PerformLayout();
             this.animationGroup.ResumeLayout(false);
             this.animationGroup.PerformLayout();
             this.ResumeLayout(false);
@@ -614,8 +598,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox curveStart;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox curveEnd;
         internal Microsoft.Office.Tools.Ribbon.RibbonBox box1;
-        internal Microsoft.Office.Tools.Ribbon.RibbonBox box2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBoxNormalizeEqShape;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton resizeWidth;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton resizeHeight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton followAnimation;
