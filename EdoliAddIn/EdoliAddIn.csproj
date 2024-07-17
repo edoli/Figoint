@@ -1,4 +1,4 @@
-<Project ToolsVersion="16.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="16.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <!--
     This section defines project-level properties.
@@ -348,8 +348,12 @@
     <Compile Include="Expressive\VariableProviderDictionary.cs" />
     <Compile Include="MathExt.cs" />
     <Compile Include="ImageExt.cs" />
-    <Compile Include="ColorExt.cs" />
-    <Compile Include="SVGTool.cs" />
+    <Compile Include="SVGTool/ColorExt.cs" />
+    <Compile Include="SVGTool/SVGTool.cs" />
+    <Compile Include="SVGTool/SVGStyleParser.cs" />
+    <Compile Include="SVGTool/SVGGradientParser.cs" />
+    <Compile Include="SVGTool/SVGStrokeDashArrayParser.cs" />
+    <Compile Include="SVGTool/SVGTransformParser.cs" />
     <Compile Include="ShapeInfoQuadTree.cs" />
     <Compile Include="TextTool.cs" />
     <Compile Include="ImageTool.cs" />
