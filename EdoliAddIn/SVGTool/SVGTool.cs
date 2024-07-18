@@ -124,8 +124,7 @@ namespace EdoliAddIn
             float centerX = 0f;
             float centerY = 0f;
 
-            // HACK: Is it required?
-            // styleParser.ParseAndConvertStyle(groupElement);
+            styleParser.ParseAndConvertStyle(groupElement);
             
             foreach (var childElement in groupElement.Elements())
             {
@@ -163,7 +162,6 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawRectangle(XElement rect)
         {
-            // TODO: 둥근 모서리 지원
             float x = float.Parse(rect.Attribute("x")?.Value ?? "0");
             float y = float.Parse(rect.Attribute("y")?.Value ?? "0");
             float width = float.Parse(rect.Attribute("width").Value);
@@ -308,7 +306,6 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawPath(XElement pathElement)
         {
-            // TODO: Curve path가 제대로 안그려지고 있음. 특히 A에 문제가 있는거 같음
             string d = pathElement.Attribute("d").Value;
             List<Vector2> points = ParsePathToPoints(d);
             int numPoints = points.Count;
