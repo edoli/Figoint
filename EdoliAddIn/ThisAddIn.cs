@@ -10,6 +10,11 @@ namespace EdoliAddIn
         {
         }
 
+        public void AfterShapeSizeChange(PowerPoint.Shape shape)
+        {
+            DebugTool.OnAfterShapeSizeChange();
+        }
+
         public void WindowSelectionChange(Selection sel)
         {
             var shapes = Util.ListSelectedShapes();
@@ -34,6 +39,8 @@ namespace EdoliAddIn
                     Globals.Ribbons.EdoliRibbon.curveEnd.Text = shape.Tags[ShapeTool.ExpressiveEndValueTagName];
                 }
             }
+
+            DebugTool.OnWindowSelectionChange();
         }
 
 
@@ -41,6 +48,9 @@ namespace EdoliAddIn
         {
             KeyboardHook.SetHook();
             this.Application.WindowSelectionChange += new PowerPoint.EApplication_WindowSelectionChangeEventHandler(WindowSelectionChange);
+            this.Application.AfterShapeSizeChange += new PowerPoint.EApplication_AfterShapeSizeChangeEventHandler(AfterShapeSizeChange);
+
+            DebugTool.OnStart();
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
