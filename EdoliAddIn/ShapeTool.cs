@@ -2,6 +2,7 @@
 using Microsoft.Office.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -315,6 +316,103 @@ namespace EdoliAddIn
                 }
             }
         }
+
+        public class ConnectorInfo
+        {
+            public PowerPoint.Shape Shape;
+            public int ConnectorSite;
+
+            public ConnectorInfo(PowerPoint.Shape shape, int connectorSite)
+            {
+                Shape = shape;
+                ConnectorSite = connectorSite;
+            }
+        }
+
+        public static void ConnectAllCandidates()
+        {
+            Globals.ThisAddIn.Application.StartNewUndoEntry();
+            var shapes = Util.ListSelectedShapes();
+
+            PowerPoint.Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+            var connectors = new List<Leaf<ConnectorInfo>>();
+
+            var line = slide.Shapes.AddLine(0, 0, 10, 10);
+
+            var connectorShapes = new List<PowerPoint.Shape>();
+
+            foreach (var shape in shapes)
+            {
+                if (shape.Connector == MsoTriState.msoTrue)
+                {
+                    connectorShapes.Add(shape);
+                    continue;
+                }
+                for (int i = 0; i < shape.ConnectionSiteCount; i++)
+                {
+                    line.ConnectorFormat.EndConnect(shape, i + 1);
+                    float x = line.Left + line.Width;
+                    float y = line.Top + line.Height;
+                    if (x == 0) {
+                        x = line.Left;
+                    }
+                    if (y == 0) {
+                        y = line.Top;
+                    }
+                    connectors.Add(new Leaf<ConnectorInfo>(new ConnectorInfo(shape, i + 1), x, y));
+                }
+            }
+
+            line.Delete();
+            
+            var searchTree = new KdTree<ConnectorInfo>(connectors);
+
+            // HACK: unable to get exact node points of line.
+            foreach (var shape in connectorShapes)
+            {
+                var p1 = new Vector2(shape.Left, shape.Top);
+                var p2 = new Vector2(shape.Left, shape.Top + shape.Height);
+                var p3 = new Vector2(shape.Left + shape.Width, shape.Top);
+                var p4 = new Vector2(shape.Left + shape.Width, shape.Top + shape.Height);
+
+                var points = new List<Vector2>();
+
+                points.Add(p1);
+                if (!IsCloseEnough(p1, p2))
+                {
+                    points.Add(p2);
+                }
+                if (!IsCloseEnough(p1, p3))
+                {
+                    points.Add(p3);
+                }
+                if (!IsCloseEnough(p2, p4) && !IsCloseEnough(p3, p4))
+                {
+                    points.Add(p4);
+                }
+                var nearests = points.Select(p => searchTree.FindNearest(p.X, p.Y))
+                    .Where((n, i) => n != null && IsCloseEnough(points[i], n.X, n.Y)).ToArray();
+
+                if (nearests.Count() == 2)
+                {
+                    var n1 = nearests[0].Data;
+                    var n2 = nearests[1].Data;
+                    shape.ConnectorFormat.BeginConnect(n1.Shape, n1.ConnectorSite);
+                    shape.ConnectorFormat.EndConnect(n2.Shape, n2.ConnectorSite);
+                }
+            }
+        }
+
+        public static bool IsCloseEnough(Vector2 a, Vector2 b)
+        {
+            return IsCloseEnough(a, b.X, b.Y);
+        }
+
+        public static bool IsCloseEnough(Vector2 a, float x, float y)
+        {
+            return Math.Abs(a.X - x) + Math.Abs(a.Y - y) < 0.1f;
+        }
+
 
         public static Expression GenerateExpression(string expression)
         {
