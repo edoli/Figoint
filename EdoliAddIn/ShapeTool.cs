@@ -365,7 +365,13 @@ namespace EdoliAddIn
 
             line.Delete();
             
-            var searchTree = new KdTree<ConnectorInfo>(connectors);
+            // TODO: KdTree has problem
+            // var searchTree = new KdTree<ConnectorInfo>(connectors);
+            var searchTree = new QuadTree<ConnectorInfo>();
+            foreach (var connector in connectors)
+            {
+                searchTree.Insert(connector);
+            }
 
             // HACK: unable to get exact node points of line.
             foreach (var shape in connectorShapes)
@@ -410,7 +416,7 @@ namespace EdoliAddIn
 
         public static bool IsCloseEnough(Vector2 a, float x, float y)
         {
-            return Math.Abs(a.X - x) + Math.Abs(a.Y - y) < 0.1f;
+            return Math.Abs(a.X - x) + Math.Abs(a.Y - y) < 2f;
         }
 
 
