@@ -21,6 +21,7 @@ namespace EdoliAddIn
         private readonly PowerPoint.Slide slide;
         private ShapeInfoQuadTree currentQuadTree;
         private List<ShapeInfo> currentGroup;
+        private Dictionary<string, string> currentGroupAttribute;
         private SVGGradientParser gradientParser;
         private SVGStyleParser styleParser;
 
@@ -100,9 +101,13 @@ namespace EdoliAddIn
             {
                 currentGroup?.Add(shapeInfo);
 
-                if (elementName != "text")
+                if (elementName != "g" && elementName != "text")
                 {
                     ApplyBasicStyles(shapeInfo.Data, element);
+                }
+                else if (elementName == "g")
+                {
+                    ApplyGroupStyles(shapeInfo.Data, element);
                 }
 
                 if (textShapeNames.Contains(elementName))
@@ -112,6 +117,35 @@ namespace EdoliAddIn
             }
         }
 
+
+        private string GetAttribute(XElement element, string attribute, string defaultValue = null)
+        {
+            return element.Attribute(attribute)?.Value ?? defaultValue;
+        }
+
+        private string GetAttributeAlter(XElement element, string attribute, string alternateAttribute, string defaultValue = null)
+        {
+            return element.Attribute(attribute)?.Value ?? element.Attribute(alternateAttribute)?.Value ?? defaultValue;
+        }
+
+        private string GetAttributeInherit(XElement element, string attribute, string defaultValue = null)
+        {
+            return element.Attribute(attribute)?.Value ?? (currentGroupAttribute.TryGetValue(attribute, out string value) ? value : defaultValue);
+        }
+
+        private void AddGroupAttribute(XElement element, string attribute)
+        {
+            var attrElem = element.Attribute(attribute);
+            if (attrElem != null)
+            {
+                currentGroupAttribute[attribute] = attrElem.Value;
+            }
+        }
+
+        private readonly string[] inheritAttributes = new string[] {
+            "stroke", "stroke-dasharray", "fill", "opacity", "stroke-width", "marker-start", "marker-end",
+            "font-family", "font-size", "font-weight", "font-style", "text-decoration", "text-anchor", };
+
         private ShapeInfo ProcessGroup(XElement groupElement)
         {
             var previousQuadTree = currentQuadTree;
@@ -120,11 +154,19 @@ namespace EdoliAddIn
             var previousGroup = currentGroup;
             currentGroup = new List<ShapeInfo>();
 
+            var previousGroupAttribute = currentGroupAttribute;
+            currentGroupAttribute = new Dictionary<string, string>();
+
             PowerPoint.Shape groupedShape = null;
             float centerX = 0f;
             float centerY = 0f;
 
             styleParser.ParseAndConvertStyle(groupElement);
+            
+            foreach (var attr in inheritAttributes)
+            {
+                AddGroupAttribute(groupElement, attr);
+            }
             
             foreach (var childElement in groupElement.Elements())
             {
@@ -142,13 +184,12 @@ namespace EdoliAddIn
 
             currentQuadTree = previousQuadTree;
             currentGroup = previousGroup;
+            currentGroupAttribute = previousGroupAttribute;
 
             if (groupedShape == null)
             {
                 return null;
             }
-
-            ApplyGroupStyles(groupedShape, groupElement);
             
             float left = groupedShape.Left;
             float top = groupedShape.Top;
@@ -162,13 +203,13 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawRectangle(XElement rect)
         {
-            float x = float.Parse(rect.Attribute("x")?.Value ?? "0");
-            float y = float.Parse(rect.Attribute("y")?.Value ?? "0");
-            float width = float.Parse(rect.Attribute("width").Value);
-            float height = float.Parse(rect.Attribute("height").Value);
+            float x = float.Parse(GetAttribute(rect, "x", "0"));
+            float y = float.Parse(GetAttribute(rect, "y", "0"));
+            float width = float.Parse(GetAttribute(rect, "width"));
+            float height = float.Parse(GetAttribute(rect, "height"));
                     
-            float rx = float.Parse(rect.Attribute("rx")?.Value ?? "0");
-            float ry = float.Parse(rect.Attribute("ry")?.Value ?? "0");
+            float rx = float.Parse(GetAttribute(rect, "rx", "0"));
+            float ry = float.Parse(GetAttribute(rect, "ry", "0"));
                     
             PowerPoint.Shape shape;
             if (rx > 0 || ry > 0)
@@ -235,9 +276,9 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawCircle(XElement circle)
         {
-            float cx = float.Parse(circle.Attribute("cx").Value);
-            float cy = float.Parse(circle.Attribute("cy").Value);
-            float r = float.Parse(circle.Attribute("r").Value);
+            float cx = float.Parse(GetAttribute(circle, "cx"));
+            float cy = float.Parse(GetAttribute(circle, "cx"));
+            float r = float.Parse(GetAttribute(circle, "r"));
 
             var shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeOval, cx - r, cy - r, r * 2, r * 2);
             return new ShapeInfo(shape, cx, cy);
@@ -245,10 +286,11 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawLine(XElement line)
         {
-            float x1 = float.Parse(line.Attribute("x1").Value);
-            float y1 = float.Parse(line.Attribute("y1").Value);
-            float x2 = float.Parse(line.Attribute("x2").Value);
-            float y2 = float.Parse(line.Attribute("y2").Value);
+            // TODO: minor improvement by bypass float.Parse when no param
+            float x1 = float.Parse(GetAttributeAlter(line, "x1", "x", "0"));
+            float y1 = float.Parse(GetAttributeAlter(line, "y1", "y", "0"));
+            float x2 = float.Parse(GetAttribute(line, "x2", "0"));
+            float y2 = float.Parse(GetAttribute(line, "y2", "0"));
 
             PowerPoint.Shape shape = slide.Shapes.AddLine(x1, y1, x2, y2);
 
@@ -258,10 +300,10 @@ namespace EdoliAddIn
         
         private ShapeInfo DrawEllipse(XElement ellipse)
         {
-            float cx = float.Parse(ellipse.Attribute("cx")?.Value ?? "0");
-            float cy = float.Parse(ellipse.Attribute("cy")?.Value ?? "0");
-            float rx = float.Parse(ellipse.Attribute("rx")?.Value ?? "0");
-            float ry = float.Parse(ellipse.Attribute("ry")?.Value ?? "0");
+            float cx = float.Parse(GetAttribute(ellipse, "cx", "0"));
+            float cy = float.Parse(GetAttribute(ellipse, "cy", "0"));
+            float rx = float.Parse(GetAttribute(ellipse, "rx", "0"));
+            float ry = float.Parse(GetAttribute(ellipse, "ry", "0"));
 
             var shape = slide.Shapes.AddShape(
                 MsoAutoShapeType.msoShapeOval, 
@@ -273,7 +315,7 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawPolygon(XElement polygon)
         {
-            string points = polygon.Attribute("points")?.Value;
+            string points = GetAttribute(polygon, "points");
             if (string.IsNullOrEmpty(points))
             {
                 return null;
@@ -306,7 +348,8 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawPath(XElement pathElement)
         {
-            string d = pathElement.Attribute("d").Value;
+            // TODO: M 커맨드가 중간에 있는 경우 여러개의 path로 나누기
+            string d = GetAttribute(pathElement, "d");
             List<Vector2> points = ParsePathToPoints(d);
             int numPoints = points.Count;
 
@@ -684,47 +727,45 @@ namespace EdoliAddIn
 
         private void ApplyBasicStyles(PowerPoint.Shape shape, XElement element)
         {
-            bool isStrokeElement = IsStrokeRequiredElement(element);
+            bool isGroup = element.Name.LocalName.ToLower() == "g";
 
-            string stroke = element.Attribute("stroke")?.Value;
+            string stroke = GetAttributeInherit(element, "stroke");
             if (!string.IsNullOrEmpty(stroke))
             {
+                shape.Line.Visible = MsoTriState.msoTrue;
                 shape.Line.ForeColor.RGB = MyColor.FromSVG(stroke).ToInt();
             }
-            else
+            else if (!isGroup)
             {
                 shape.Line.Visible = MsoTriState.msoFalse;
             }
             
-            string strokeDashArray = element.Attribute("stroke-dasharray")?.Value;
+            string strokeDashArray = GetAttributeInherit(element, "stroke-dasharray");
             if (!string.IsNullOrEmpty(strokeDashArray))
             {
                 SVGStrokeDashArrayParser.ApplyStrokeDashArray(shape, strokeDashArray);
             }
 
-            if (shape.Fill.ForeColor.Type != MsoColorType.msoColorTypeMixed)
+            string fill = GetAttributeInherit(element, "fill");
+            string opacity = GetAttributeInherit(element, "opacity");
+            
+            if (!string.IsNullOrEmpty(fill) && fill != "none")
             {
-                string fill = element.Attribute("fill")?.Value;
-                fill = string.IsNullOrEmpty(fill) ? "#000" : fill;
-                string opacity = element.Attribute("opacity")?.Value;
-
-                if (fill != "none")
-                {
-                    FillColor(shape, fill, opacity);
-                }
-                else
-                {
-                    shape.Fill.Visible = MsoTriState.msoFalse;
-                }
+                shape.Fill.Visible = MsoTriState.msoTrue;
+                FillColor(shape, fill, opacity);
+            }
+            else if (!isGroup)
+            {
+                shape.Fill.Visible = MsoTriState.msoFalse;
             }
 
-            string strokeWidth = element.Attribute("stroke-width")?.Value;
+            string strokeWidth = GetAttributeInherit(element, "stroke-width");
             if (!string.IsNullOrEmpty(strokeWidth))
             {
                 shape.Line.Weight = float.Parse(strokeWidth);
             }
 
-            string transform = element.Attribute("transform")?.Value;
+            string transform = GetAttribute(element, "transform");
             if (!string.IsNullOrEmpty(transform))
             {
                 SVGTransformParser.ApplyTransform(shape, transform);
@@ -733,8 +774,8 @@ namespace EdoliAddIn
 
         private void ApplyMarkers(PowerPoint.Shape shape, XElement pathElement)
         {
-            string markerStart = pathElement.Attribute("marker-start")?.Value;
-            string markerEnd = pathElement.Attribute("marker-end")?.Value;
+            string markerStart = GetAttributeInherit(pathElement, "marker-start");
+            string markerEnd = GetAttributeInherit(pathElement, "marker-end");
 
             if (!string.IsNullOrEmpty(markerStart) && markerStart.Contains("arrow"))
             {
@@ -749,7 +790,7 @@ namespace EdoliAddIn
 
         private void ApplyGroupStyles(PowerPoint.Shape shape, XElement element)
         {
-            string transform = element.Attribute("transform")?.Value;
+            string transform = GetAttribute(element, "transform");
             if (!string.IsNullOrEmpty(transform))
             {
                 SVGTransformParser.ApplyTransform(shape, transform);
@@ -764,8 +805,8 @@ namespace EdoliAddIn
 
         private ShapeInfo DrawText(XElement textElement)
         {
-            float x = float.Parse(textElement.Attribute("x")?.Value ?? "0");
-            float y = float.Parse(textElement.Attribute("y")?.Value ?? "0");
+            float x = float.Parse(GetAttribute(textElement, "x", "0"));
+            float y = float.Parse(GetAttribute(textElement, "y", "0"));
 
             (float centerX, float centerY, float totalHeight) = CalculateTextBlockCenter(textElement);
             
@@ -775,9 +816,9 @@ namespace EdoliAddIn
 
             // HACK: Currently only allow middle aligned text
             if (nearestShape != null 
-                && IsCloseEnough(centerX, centerY, nearestShape) 
+                && IsCloseEnough(centerX, centerY, totalHeight, nearestShape)
                 && IsShapeTextEmpty(nearestShape.Data)
-                && textElement.Attribute("text-anchor")?.Value == "middle")
+                && GetAttributeInherit(textElement, "text-anchor") == "middle")
             {
                 // 도형 내부에 텍스트 추가
                 nearestShape.Data.TextFrame2.TextRange.Text = text;
@@ -805,7 +846,7 @@ namespace EdoliAddIn
                 textFrame.MarginTop = 0;
 
                 ApplyTextStyles(textFrame, textElement);
-                AdjustTextPosition(textBox, x, y, textElement.Attribute("text-anchor")?.Value);
+                AdjustTextPosition(textBox, x, y, GetAttributeInherit(textElement, "text-anchor"));
                 return new ShapeInfo(textBox, x, y);
             }
         }
@@ -841,9 +882,9 @@ namespace EdoliAddIn
         private (float centerX, float centerY, float totalHeight) CalculateTextBlockCenter(XElement textElement)
         {
             // TODO: fix it
-            float x = float.Parse(textElement.Attribute("x")?.Value ?? "0");
-            float y = float.Parse(textElement.Attribute("y")?.Value ?? "0");
-            float totalDy = 0;
+            float x = float.Parse(GetAttribute(textElement, "x", "0"));
+            float y = float.Parse(GetAttribute(textElement, "y", "0"));
+            float summedY = 0;
             float currentY = y;
             int lineCount = 0;
 
@@ -851,20 +892,21 @@ namespace EdoliAddIn
             {
                 if (node is XElement tspan)
                 {
-                    float dy = float.Parse(tspan.Attribute("dy")?.Value ?? "0");
+                    float dy = float.Parse(GetAttribute(textElement, "dy", "0"));
                     currentY += dy;
-                    totalDy += currentY;
+                    summedY += currentY;
                     lineCount++;
                 }
                 else if (node is XText)
                 {
+                    summedY += y;
                     lineCount++;
                 }
             }
 
             // Estimate line height based on font size if available
             float lineHeight = 20; // Default line height
-            string fontSize = textElement.Attribute("font-size")?.Value;
+            string fontSize = GetAttributeInherit(textElement, "font-size");
             if (!string.IsNullOrEmpty(fontSize))
             {
                 if (fontSize.EndsWith("px"))
@@ -874,8 +916,8 @@ namespace EdoliAddIn
                 lineHeight = float.Parse(fontSize) * 1.2f; // Assuming line height is 1.2 times font size
             }
 
-            float totalHeight = totalDy + (lineCount - 1) * lineHeight;
-            float centerY = totalDy / lineCount;
+            float totalHeight = currentY - y + lineHeight;
+            float centerY = summedY / lineCount; // 평균값 사용
 
             return (x, centerY, totalHeight);
         }
@@ -885,13 +927,13 @@ namespace EdoliAddIn
         {
             var textRange = textFrame.TextRange;
 
-            string fontFamily = textElement.Attribute("font-family")?.Value;
+            string fontFamily = GetAttributeInherit(textElement, "font-family");
             if (!string.IsNullOrEmpty(fontFamily))
             {
                 textRange.Font.Name = fontFamily.Trim('\'', '"');
             }
 
-            string fontSize = textElement.Attribute("font-size")?.Value;
+            string fontSize = GetAttributeInherit(textElement, "font-size");
             if (!string.IsNullOrEmpty(fontSize))
             {
                 if (fontSize.EndsWith("px"))
@@ -901,7 +943,7 @@ namespace EdoliAddIn
                 textRange.Font.Size = float.Parse(fontSize);
             }
 
-            string fill = textElement.Attribute("fill")?.Value;
+            string fill = GetAttributeInherit(textElement, "fill");
             if (!string.IsNullOrEmpty(fill))
             {
                 textRange.Font.Fill.ForeColor.RGB = MyColor.FromSVG(fill).ToInt();
@@ -911,19 +953,19 @@ namespace EdoliAddIn
                 textRange.Font.Fill.ForeColor.ObjectThemeColor = MsoThemeColorIndex.msoThemeColorDark1;
             }
 
-            string fontWeight = textElement.Attribute("font-weight")?.Value;
+            string fontWeight = GetAttributeInherit(textElement, "font-weight");
             if (!string.IsNullOrEmpty(fontWeight))
             {
                 textRange.Font.Bold = fontWeight == "bold" ? MsoTriState.msoTrue : MsoTriState.msoFalse;
             }
 
-            string fontStyle = textElement.Attribute("font-style")?.Value;
+            string fontStyle = GetAttributeInherit(textElement, "font-style");
             if (!string.IsNullOrEmpty(fontStyle))
             {
                 textRange.Font.Italic = fontStyle == "italic" ? MsoTriState.msoTrue : MsoTriState.msoFalse;
             }
 
-            string textDecoration = textElement.Attribute("text-decoration")?.Value;
+            string textDecoration = GetAttributeInherit(textElement, "text-decoration");
             if (!string.IsNullOrEmpty(textDecoration))
             {
                 if (textDecoration.Contains("underline"))
@@ -936,7 +978,7 @@ namespace EdoliAddIn
                 }
             }
 
-            string textAnchor = textElement.Attribute("text-anchor")?.Value;
+            string textAnchor = GetAttributeInherit(textElement, "text-anchor");
             if (!string.IsNullOrEmpty(textAnchor))
             {
                 switch (textAnchor)
@@ -988,10 +1030,10 @@ namespace EdoliAddIn
             return totalHeight / lineCount;
         }
 
-        private bool IsCloseEnough(float x, float y, ShapeInfo shape)
+        private bool IsCloseEnough(float x, float y, float textHeight, ShapeInfo shape)
         {
             // 이 임계값은 조정할 수 있습니다.
-            float threshold = Math.Min(shape.Data.Width, shape.Data.Height) / 4;
+            float threshold = textHeight / 2;
             return Math.Abs(x - shape.X) < threshold && Math.Abs(y - shape.Y) < threshold;
         }
 
