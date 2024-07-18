@@ -12,7 +12,9 @@ namespace EdoliAddIn
 
         public void AfterShapeSizeChange(PowerPoint.Shape shape)
         {
+#if DEBUG
             DebugTool.OnAfterShapeSizeChange();
+#endif
         }
 
         public void WindowSelectionChange(Selection sel)
@@ -40,7 +42,9 @@ namespace EdoliAddIn
                 }
             }
 
+#if DEBUG
             DebugTool.OnWindowSelectionChange();
+#endif
         }
 
 
@@ -50,7 +54,9 @@ namespace EdoliAddIn
             this.Application.WindowSelectionChange += new PowerPoint.EApplication_WindowSelectionChangeEventHandler(WindowSelectionChange);
             this.Application.AfterShapeSizeChange += new PowerPoint.EApplication_AfterShapeSizeChangeEventHandler(AfterShapeSizeChange);
 
+#if DEBUG
             DebugTool.OnStart();
+#endif
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
