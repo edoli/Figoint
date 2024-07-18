@@ -1,25 +1,41 @@
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace EdoliAddIn
 {
     public class MyColor
     {
-        private static readonly Dictionary<string, Color> ColorKeywords = new Dictionary<string, Color>
-        {
-            {"none", Color.Transparent},
-        };
-
         public static MyColor FromSVG(string colorString, string opacityString = null)
-        {   
+        {
+            colorString = colorString.Trim();
             Color color;
-            if (ColorKeywords.TryGetValue(colorString, out Color knownColor))
+
+            // RGB 형식 확인
+            Match rgbMatch = Regex.Match(colorString, @"^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$");
+            if (rgbMatch.Success)
             {
-                color = knownColor;
-            }
-            else
-            {
-                color = ColorTranslator.FromHtml(colorString);
+                color = Color.FromArgb(
+                    int.Parse(rgbMatch.Groups[1].Value),
+                    int.Parse(rgbMatch.Groups[2].Value),
+                    int.Parse(rgbMatch.Groups[3].Value)
+                );
+            } else {
+                // RGB 형식 확인
+                Match rgbaMatch = Regex.Match(colorString, @"^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$");
+                if (rgbaMatch.Success)
+                {
+                    color = Color.FromArgb(
+                        (int)(float.Parse(rgbaMatch.Groups[4].Value) * 255),
+                        int.Parse(rgbaMatch.Groups[1].Value),
+                        int.Parse(rgbaMatch.Groups[2].Value),
+                        int.Parse(rgbaMatch.Groups[3].Value)
+                    );
+                }
+                else
+                {
+                    color = ColorTranslator.FromHtml(colorString);
+                }
             }
             
             if (string.IsNullOrEmpty(opacityString))
