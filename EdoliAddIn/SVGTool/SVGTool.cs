@@ -2,7 +2,6 @@ using Microsoft.Office.Core;
 using Microsoft.Scripting.Utils;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -11,8 +10,12 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
+
 namespace EdoliAddIn
 {
+    using ShapeInfoQuadTree = QuadTree<PowerPoint.Shape>;
+    using ShapeInfo = Leaf<PowerPoint.Shape>;
+
     public class SVGtoPPTParser
     {
         private readonly PowerPoint.Slide slide;
@@ -56,7 +59,7 @@ namespace EdoliAddIn
             XElement svg = XElement.Parse(svgCode);
             styleParser = new SVGStyleParser(svg);
             gradientParser = new SVGGradientParser(svg);
-            return ProcessGroup(svg).Shape;
+            return ProcessGroup(svg).Data;
         }
 
         private void ProcessElement(XElement element)
@@ -97,9 +100,9 @@ namespace EdoliAddIn
             {
                 currentGroup?.Add(shapeInfo);
 
-                if (elementName != "g" && elementName != "text")
+                if (elementName != "text")
                 {
-                    ApplyBasicStyles(shapeInfo.Shape, element);
+                    ApplyBasicStyles(shapeInfo.Data, element);
                 }
 
                 if (textShapeNames.Contains(elementName))
@@ -131,11 +134,11 @@ namespace EdoliAddIn
 
             if (currentGroup.Count > 1)
             {
-                groupedShape = slide.Shapes.Range(currentGroup.Select(s => s.Shape.Name).ToArray()).Group();
+                groupedShape = slide.Shapes.Range(currentGroup.Select(s => s.Data.Name).ToArray()).Group();
             }
             else if (currentGroup.Count == 1)
             {
-                groupedShape = currentGroup[0].Shape;
+                groupedShape = currentGroup[0].Data;
             }
 
             currentQuadTree = previousQuadTree;
@@ -155,7 +158,7 @@ namespace EdoliAddIn
             centerX = (left + right) / 2;
             centerY = (top + bottom) / 2;
 
-            return new ShapeInfo { Shape = groupedShape, CenterX = centerX, CenterY = centerY};
+            return new ShapeInfo(groupedShape, centerX, centerY);
         }
 
         private ShapeInfo DrawRectangle(XElement rect)
@@ -165,9 +168,71 @@ namespace EdoliAddIn
             float y = float.Parse(rect.Attribute("y")?.Value ?? "0");
             float width = float.Parse(rect.Attribute("width").Value);
             float height = float.Parse(rect.Attribute("height").Value);
+                    
+            float rx = float.Parse(rect.Attribute("rx")?.Value ?? "0");
+            float ry = float.Parse(rect.Attribute("ry")?.Value ?? "0");
+                    
+            PowerPoint.Shape shape;
+            if (rx > 0 || ry > 0)
+            {
+                // rx와 ry 중 하나만 지정된 경우 다른 하나도 같은 값으로 설정
+                if (rx > 0 && ry == 0) ry = rx;
+                if (ry > 0 && rx == 0) rx = ry;
 
-            var shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeRectangle, x, y, width, height);
-            return new ShapeInfo { Shape = shape, CenterX = x + width / 2, CenterY = y + height / 2 };
+                // rx와 ry의 최대값은 width/2와 height/2
+                rx = Math.Min(rx, width / 2);
+                ry = Math.Min(ry, height / 2);
+
+                if (rx == ry)
+                {
+                    shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeRoundedRectangle, x, y, width, height);
+                    
+                    // PowerPoint에서 모서리 반경은 0에서 0.5 사이의 값으로 표현됨
+                    float adjustmentValue = rx / width;
+                    shape.Adjustments[1] = adjustmentValue;
+                }
+                else
+                {
+                    shape = DrawRoundedRectangle(x, y, width, height, rx, ry);
+                }
+            }
+            else
+            {
+                shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeRectangle, x, y, width, height);
+            }
+            return new ShapeInfo(shape, x + width / 2, y + height / 2);
+        }
+
+        private PowerPoint.Shape DrawRoundedRectangle(float x, float y, float width, float height, float rx, float ry)
+        {
+            List<Vector2> points = new List<Vector2>();
+
+            var startPoint = new Vector2(x + rx, y);
+            var currentPoint = startPoint;
+            var lastControlPoint = startPoint;
+
+            LineTo(ref currentPoint, ref lastControlPoint, new float[] { x + width - rx, y }, false, points);
+            EllipticalArc(ref currentPoint, ref lastControlPoint, new float[] { rx, ry, 0, 0, 1, x + width, y + ry }, false, points);
+            LineTo(ref currentPoint, ref lastControlPoint, new float[] { x + width, y + height - ry }, false, points);
+            EllipticalArc(ref currentPoint, ref lastControlPoint, new float[] { rx, ry, 0, 0, 1, x + width - rx, y + height }, false, points);
+            LineTo(ref currentPoint, ref lastControlPoint, new float[] { x + rx, y + height }, false, points);
+            EllipticalArc(ref currentPoint, ref lastControlPoint, new float[] { rx, ry, 0, 0, 1, x, y + height - ry }, false, points);
+            LineTo(ref currentPoint, ref lastControlPoint, new float[] { x, y + ry }, false, points);
+            EllipticalArc(ref currentPoint, ref lastControlPoint, new float[] { rx, ry, 0, 0, 1, x + rx, y }, false, points);
+
+            points.Add(currentPoint);
+
+            // PowerPoint에서 사용할 수 있는 형식으로 점들 변환
+            float[,] pointsArray = new float[points.Count, 2];
+            for (int i = 0; i < points.Count; i++)
+            {
+                pointsArray[i, 0] = points[i].X;
+                pointsArray[i, 1] = points[i].Y;
+            }
+
+            PowerPoint.Shape shape = slide.Shapes.AddCurve(pointsArray);
+
+            return shape;
         }
 
         private ShapeInfo DrawCircle(XElement circle)
@@ -177,7 +242,7 @@ namespace EdoliAddIn
             float r = float.Parse(circle.Attribute("r").Value);
 
             var shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeOval, cx - r, cy - r, r * 2, r * 2);
-            return new ShapeInfo { Shape = shape, CenterX = cx, CenterY = cy };
+            return new ShapeInfo(shape, cx, cy);
         }
 
         private ShapeInfo DrawLine(XElement line)
@@ -190,7 +255,7 @@ namespace EdoliAddIn
             PowerPoint.Shape shape = slide.Shapes.AddLine(x1, y1, x2, y2);
 
             ApplyMarkers(shape, line);
-            return new ShapeInfo { Shape = shape, CenterX = (x1 + x2) / 2, CenterY = (y1 + y2) / 2 };
+            return new ShapeInfo(shape, (x1 + x2) / 2, (y1 + y2) / 2);
         }
         
         private ShapeInfo DrawEllipse(XElement ellipse)
@@ -205,7 +270,7 @@ namespace EdoliAddIn
                 cx - rx, cy - ry, rx * 2, ry * 2
             );
 
-            return new ShapeInfo { Shape = shape, CenterX = cx, CenterY = cy };
+            return new ShapeInfo(shape, cx, cy);
         }
 
         private ShapeInfo DrawPolygon(XElement polygon)
@@ -238,7 +303,7 @@ namespace EdoliAddIn
             float centerX = pointList.Where((x, i) => i % 2 == 0).Average();
             float centerY = pointList.Where((y, i) => i % 2 != 0).Average();
 
-            return new ShapeInfo { Shape = shape, CenterX = centerX, CenterY = centerY };
+            return new ShapeInfo(shape, centerX, centerY);
         }
 
         private ShapeInfo DrawPath(XElement pathElement)
@@ -280,7 +345,7 @@ namespace EdoliAddIn
             }
 
             // Polyline 생성
-            PowerPoint.Shape shape = slide.Shapes.AddPolyline(pointsArray);
+            PowerPoint.Shape shape = slide.Shapes.AddCurve(pointsArray);
 
             // 위치와 크기 조정
             shape.Left = minX;
@@ -289,7 +354,7 @@ namespace EdoliAddIn
             shape.Height = height;
 
             ApplyMarkers(shape, pathElement);
-            return new ShapeInfo { Shape = shape, CenterX = centerX, CenterY = centerY };
+            return new ShapeInfo(shape, centerX, centerY);
 
         }
 
@@ -313,19 +378,19 @@ namespace EdoliAddIn
                 {
                     case 'M':
                     case 'm':
-                        MoveTo(ref currentPoint, parameters, command == 'm', points);
+                        MoveTo(ref currentPoint, ref lastCubicControlPoint, parameters, command == 'm', points);
                         break;
                     case 'L':
                     case 'l':
-                        LineTo(ref currentPoint, parameters, command == 'l', points);
+                        LineTo(ref currentPoint, ref lastCubicControlPoint, parameters, command == 'l', points);
                         break;
                     case 'H':
                     case 'h':
-                        HorizontalLineTo(ref currentPoint, parameters, command == 'h', points);
+                        HorizontalLineTo(ref currentPoint, ref lastCubicControlPoint, parameters, command == 'h', points);
                         break;
                     case 'V':
                     case 'v':
-                        VerticalLineTo(ref currentPoint, parameters, command == 'v', points);
+                        VerticalLineTo(ref currentPoint, ref lastCubicControlPoint, parameters, command == 'v', points);
                         break;
                     case 'C':
                     case 'c':
@@ -345,20 +410,20 @@ namespace EdoliAddIn
                         break;
                     case 'A':
                     case 'a':
-                        EllipticalArc(ref currentPoint, parameters, command == 'a', points);
+                        EllipticalArc(ref currentPoint, ref lastQuadraticControlPoint, parameters, command == 'a', points);
                         break;
                     case 'Z':
                     case 'z':
-                        // 시작점으로 돌아가는 것은 Polyline에서 자동으로 처리되지 않으므로,
-                        // 필요하다면 시작점을 다시 추가할 수 있습니다.
                         if (points.Count > 0)
                         {
-                            points.Add(points[0]);
+                            var p0 = points[0];
+                            LineTo(ref currentPoint, ref lastCubicControlPoint, new float[] { p0.X, p0.Y }, false, points);
                         }
-                        currentPoint = points[0];
                         break;
                 }
             }
+            
+            points.Add(currentPoint);
 
             return points;
         }
@@ -369,71 +434,59 @@ namespace EdoliAddIn
             MatchCollection matches = Regex.Matches(parameterString, pattern);
             return matches.Select(match => float.Parse(((Match) match).Value)).ToArray();
         }
-
-        private void MoveTo(ref Vector2 currentPoint, float[] parameters, bool isRelative, List<Vector2> points)
+            
+        private void MoveTo(ref Vector2 currentPoint, ref Vector2 lastControlPoint, float[] parameters, bool isRelative, List<Vector2> points)
         {
             float x = parameters[0];
             float y = parameters[1];
 
-            if (isRelative)
-            {
-                currentPoint += new Vector2(x, y);
-            }
-            else
-            {
-                currentPoint = new Vector2(x, y);
-            }
+            Vector2 newPoint = isRelative ? currentPoint + new Vector2(x, y) : new Vector2(x, y);
 
-            points.Add(currentPoint);
+            currentPoint = newPoint;
+            lastControlPoint = newPoint;
         }
 
-        private void LineTo(ref Vector2 currentPoint, float[] parameters, bool isRelative, List<Vector2> points)
+        private void LineTo(ref Vector2 currentPoint, ref Vector2 lastControlPoint, float[] parameters, bool isRelative, List<Vector2> points)
         {
             float x = parameters[0];
             float y = parameters[1];
 
-            if (isRelative)
-            {
-                currentPoint += new Vector2(x, y);
-            }
-            else
-            {
-                currentPoint = new Vector2(x, y);
-            }
+            Vector2 newPoint = isRelative ? currentPoint + new Vector2(x, y) : new Vector2(x, y);
 
             points.Add(currentPoint);
+            points.Add(Vector2.Lerp(currentPoint, newPoint, 1/3f));
+            points.Add(Vector2.Lerp(currentPoint, newPoint, 2/3f));
+
+            currentPoint = newPoint;
+            lastControlPoint = points[points.Count - 1];
         }
 
-        private void HorizontalLineTo(ref Vector2 currentPoint, float[] parameters, bool isRelative, List<Vector2> points)
+        private void HorizontalLineTo(ref Vector2 currentPoint, ref Vector2 lastControlPoint, float[] parameters, bool isRelative, List<Vector2> points)
         {
             float x = parameters[0];
 
-            if (isRelative)
-            {
-                currentPoint.X += x;
-            }
-            else
-            {
-                currentPoint.X = x;
-            }
+            Vector2 newPoint = isRelative ? new Vector2(currentPoint.X + x, currentPoint.Y) : new Vector2(x, currentPoint.Y);
 
             points.Add(currentPoint);
+            points.Add(Vector2.Lerp(currentPoint, newPoint, 1/3f));
+            points.Add(Vector2.Lerp(currentPoint, newPoint, 2/3f));
+
+            currentPoint = newPoint;
+            lastControlPoint = points[points.Count - 1];
         }
 
-        private void VerticalLineTo(ref Vector2 currentPoint, float[] parameters, bool isRelative, List<Vector2> points)
+        private void VerticalLineTo(ref Vector2 currentPoint, ref Vector2 lastControlPoint, float[] parameters, bool isRelative, List<Vector2> points)
         {
             float y = parameters[0];
 
-            if (isRelative)
-            {
-                currentPoint.Y += y;
-            }
-            else
-            {
-                currentPoint.Y = y;
-            }
+            Vector2 newPoint = isRelative ? new Vector2(currentPoint.X, currentPoint.Y + y) : new Vector2(currentPoint.X, y);
 
             points.Add(currentPoint);
+            points.Add(Vector2.Lerp(currentPoint, newPoint, 1/3f));
+            points.Add(Vector2.Lerp(currentPoint, newPoint, 2/3f));
+
+            currentPoint = newPoint;
+            lastControlPoint = points[points.Count - 1];
         }
 
         private void CubicBezierCurve(ref Vector2 currentPoint, ref Vector2 lastControlPoint, float[] parameters, bool isRelative, List<Vector2> points)
@@ -442,13 +495,9 @@ namespace EdoliAddIn
             Vector2 control2 = ParsePoint(parameters, 2, isRelative, currentPoint);
             Vector2 end = ParsePoint(parameters, 4, isRelative, currentPoint);
 
-            const int segments = 10; // Adjust for smoother curves
-            for (int i = 1; i <= segments; i++)
-            {
-                float t = i / (float)segments;
-                Vector2 point = CubicBezier(currentPoint, control1, control2, end, t);
-                points.Add(point);
-            }
+            points.Add(currentPoint);
+            points.Add(control1);    
+            points.Add(control2);    
 
             currentPoint = end;
             lastControlPoint = control2;
@@ -460,13 +509,9 @@ namespace EdoliAddIn
             Vector2 control2 = ParsePoint(parameters, 0, isRelative, currentPoint);
             Vector2 end = ParsePoint(parameters, 2, isRelative, currentPoint);
 
-            const int segments = 10;
-            for (int i = 1; i <= segments; i++)
-            {
-                float t = i / (float)segments;
-                Vector2 point = CubicBezier(currentPoint, control1, control2, end, t);
-                points.Add(point);
-            }
+            points.Add(currentPoint);
+            points.Add(control1);    
+            points.Add(control2);    
 
             currentPoint = end;
             lastControlPoint = control2;
@@ -476,14 +521,15 @@ namespace EdoliAddIn
         {
             Vector2 control = ParsePoint(parameters, 0, isRelative, currentPoint);
             Vector2 end = ParsePoint(parameters, 2, isRelative, currentPoint);
+            
+            // HACK: 이거 맞나?
+            // 2차 베지어를 3차 베지어로 변환
+            Vector2 control1 = currentPoint + 2f/3f * (control - currentPoint);
+            Vector2 control2 = end + 2f/3f * (control - end);
 
-            const int segments = 10;
-            for (int i = 1; i <= segments; i++)
-            {
-                float t = i / (float)segments;
-                Vector2 point = QuadraticBezier(currentPoint, control, end, t);
-                points.Add(point);
-            }
+            points.Add(currentPoint);
+            points.Add(control1);    
+            points.Add(control2);    
 
             currentPoint = end;
             lastControlPoint = control;
@@ -494,85 +540,142 @@ namespace EdoliAddIn
             Vector2 control = currentPoint + (currentPoint - lastControlPoint);
             Vector2 end = ParsePoint(parameters, 0, isRelative, currentPoint);
 
-            const int segments = 10;
-            for (int i = 1; i <= segments; i++)
-            {
-                float t = i / (float)segments;
-                Vector2 point = QuadraticBezier(currentPoint, control, end, t);
-                points.Add(point);
-            }
+            // 2차 베지어를 3차 베지어로 변환
+            Vector2 control1 = currentPoint + 2f/3f * (control - currentPoint);
+            Vector2 control2 = end + 2f/3f * (control - end);
+
+            points.Add(currentPoint);
+            points.Add(control1);    
+            points.Add(control2);    
 
             currentPoint = end;
             lastControlPoint = control;
         }
 
-        private void EllipticalArc(ref Vector2 currentPoint, float[] parameters, bool isRelative, List<Vector2> points)
+        private const float Epsilon = 1e-7f;
+
+        private void EllipticalArc(ref Vector2 currentPoint, ref Vector2 lastControlPoint, float[] parameters, bool isRelative, List<Vector2> points)
         {
             float rx = Math.Abs(parameters[0]);
             float ry = Math.Abs(parameters[1]);
             float xAxisRotation = parameters[2] * (float)(Math.PI / 180);
-            bool largeArcFlag = parameters[3] == 1;
-            bool sweepFlag = parameters[4] == 1;
+            bool largeArcFlag = parameters[3] != 0;
+            bool sweepFlag = parameters[4] != 0;
+            Vector2 start = currentPoint;
             Vector2 end = ParsePoint(parameters, 5, isRelative, currentPoint);
 
-            if (currentPoint == end)
-            {
-                return;
-            }
-
+            // 반지름이 0이면 직선으로 처리
             if (rx == 0 || ry == 0)
             {
-                points.Add(end);
+                Vector2 control1 = Vector2.Lerp(start, end, 1/3f);
+                Vector2 control2 = Vector2.Lerp(start, end, 2/3f);
+                points.Add(control1);
+                points.Add(control2);
+                lastControlPoint = control2;
                 currentPoint = end;
                 return;
             }
 
-            EllipticalArcToBezier(currentPoint, rx, ry, xAxisRotation, largeArcFlag, sweepFlag, end, points);
-
-            currentPoint = end;
-        }
-
-        private Vector2 CubicBezier(Vector2 start, Vector2 control1, Vector2 control2, Vector2 end, float t)
-        {
-            float u = 1 - t;
-            float tt = t * t;
-            float uu = u * u;
-            float uuu = uu * u;
-            float ttt = tt * t;
-
-            Vector2 point = uuu * start;
-            point += 3 * uu * t * control1;
-            point += 3 * u * tt * control2;
-            point += ttt * end;
-
-            return point;
-        }
-
-        private Vector2 QuadraticBezier(Vector2 start, Vector2 control, Vector2 end, float t)
-        {
-            float u = 1 - t;
-            float tt = t * t;
-            float uu = u * u;
-
-            Vector2 point = uu * start;
-            point += 2 * u * t * control;
-            point += tt * end;
-
-            return point;
-        }
-
-        private void EllipticalArcToBezier(Vector2 start, float rx, float ry, float phi, bool largeArcFlag, bool sweepFlag, Vector2 end, List<Vector2> points)
-        {
-            // Implementation of elliptical arc to Bézier curves conversion
-            // This is a complex algorithm, you might want to use a library or implement it separately
-            // For now, we'll approximate with a line
-            const int segments = 20;
-            for (int i = 1; i <= segments; i++)
+            // 시작점과 끝점이 같으면 아무것도 하지 않음
+            if (Math.Abs(start.X - end.X) < Epsilon && Math.Abs(start.Y - end.Y) < Epsilon)
             {
-                float t = i / (float)segments;
-                Vector2 point = Vector2.Lerp(start, end, t);
-                points.Add(point);
+                return;
             }
+
+            // 각도를 라디안으로 변환
+            float cosPhi = (float)Math.Cos(xAxisRotation);
+            float sinPhi = (float)Math.Sin(xAxisRotation);
+
+            // 엔드포인트를 타원 좌표계로 변환
+            float x1 = cosPhi * (start.X - end.X) / 2 + sinPhi * (start.Y - end.Y) / 2;
+            float y1 = -sinPhi * (start.X - end.X) / 2 + cosPhi * (start.Y - end.Y) / 2;
+
+            // 반지름 보정
+            float lambda = (x1 * x1) / (rx * rx) + (y1 * y1) / (ry * ry);
+            if (lambda > 1)
+            {
+                float sqrtLambda = (float)Math.Sqrt(lambda);
+                rx *= sqrtLambda;
+                ry *= sqrtLambda;
+            }
+
+            // 중심점 계산
+            float sign = (largeArcFlag == sweepFlag) ? -1 : 1;
+            float sq = Math.Max(0, (rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1) / (rx * rx * y1 * y1 + ry * ry * x1 * x1));
+            Vector2 c = new Vector2(
+                sign * (float)Math.Sqrt(sq) * rx * y1 / ry,
+                sign * (float)Math.Sqrt(sq) * -ry * x1 / rx
+            );
+
+            // 중심점을 원래 좌표계로 변환
+            Vector2 center = new Vector2(
+                cosPhi * c.X - sinPhi * c.Y + (start.X + end.X) / 2,
+                sinPhi * c.X + cosPhi * c.Y + (start.Y + end.Y) / 2
+            );
+
+            // 시작각과 각도 범위 계산
+            Vector2 startVector = new Vector2((x1 - c.X) / rx, (y1 - c.Y) / ry);
+            Vector2 endVector = new Vector2((-x1 - c.X) / rx, (-y1 - c.Y) / ry);
+
+            float startAngle = (float)Math.Atan2(startVector.Y, startVector.X);
+            float sweepAngle = (float)Math.Atan2(endVector.Y * startVector.X - endVector.X * startVector.Y,
+                                                endVector.X * startVector.X + endVector.Y * startVector.Y);
+
+            if (!sweepFlag && sweepAngle > 0)
+            {
+                sweepAngle -= 2 * (float)Math.PI;
+            }
+            else if (sweepFlag && sweepAngle < 0)
+            {
+                sweepAngle += 2 * (float)Math.PI;
+            }
+
+            // 베지어 곡선 생성
+            int segments = (int)Math.Ceiling((Math.Abs(sweepAngle) - 0.01f) / (Math.PI / 2));
+            float deltaTheta = sweepAngle / segments;
+            // float t = (float)(8 / 3 * Math.Sin(deltaTheta / 4) * Math.Sin(deltaTheta / 4) / Math.Sin(deltaTheta / 2));
+            float t = 0.5522847498f;
+
+            Vector2 prevPoint = start;
+
+            for (int i = 0; i < segments; i++)
+            {
+                float theta = startAngle + i * deltaTheta;
+                float thetaNext = theta + deltaTheta;
+
+                Vector2 sinCos = new Vector2((float)Math.Sin(theta), (float)Math.Cos(theta));
+                Vector2 sinCosNext = new Vector2((float)Math.Sin(thetaNext), (float)Math.Cos(thetaNext));
+
+                Vector2 p1 = new Vector2(
+                    cosPhi * rx * sinCos.Y - sinPhi * ry * sinCos.X,
+                    sinPhi * rx * sinCos.Y + cosPhi * ry * sinCos.X
+                ) + center;
+
+                Vector2 p2 = new Vector2(
+                    cosPhi * rx * sinCosNext.Y - sinPhi * ry * sinCosNext.X,
+                    sinPhi * rx * sinCosNext.Y + cosPhi * ry * sinCosNext.X
+                ) + center;
+
+                // t * 미분값
+                Vector2 q1 = p1 + new Vector2(
+                    -t * (cosPhi * rx * sinCos.X + sinPhi * ry * sinCos.Y),
+                    -t * (sinPhi * rx * sinCos.X - cosPhi * ry * sinCos.Y)
+                );
+
+                Vector2 q2 = p2 + new Vector2(
+                    t * (cosPhi * rx * sinCosNext.X + sinPhi * ry * sinCosNext.Y),
+                    t * (sinPhi * rx * sinCosNext.X - cosPhi * ry * sinCosNext.Y)
+                );
+
+                points.Add(prevPoint);
+                points.Add(q1);
+                points.Add(q2);
+
+                prevPoint = p2;
+            }
+
+            lastControlPoint = points[points.Count - 2];
+            currentPoint = end;
         }
 
         private Vector2 ParsePoint(float[] parameters, int startIndex, bool isRelative, Vector2 currentPoint)
@@ -676,13 +779,12 @@ namespace EdoliAddIn
             // HACK: Currently only allow middle aligned text
             if (nearestShape != null 
                 && IsCloseEnough(centerX, centerY, nearestShape) 
-                && IsShapeTextEmpty(nearestShape.Shape)
-                && textElement.Attribute("text-anchor")?.Value == "middle"
-                && false)
+                && IsShapeTextEmpty(nearestShape.Data)
+                && textElement.Attribute("text-anchor")?.Value == "middle")
             {
                 // 도형 내부에 텍스트 추가
-                nearestShape.Shape.TextFrame2.TextRange.Text = text;
-                PowerPoint.TextFrame2 textFrame = nearestShape.Shape.TextFrame2;
+                nearestShape.Data.TextFrame2.TextRange.Text = text;
+                PowerPoint.TextFrame2 textFrame = nearestShape.Data.TextFrame2;
                 textFrame.TextRange.ParagraphFormat.Alignment = MsoParagraphAlignment.msoAlignCenter;
                 textFrame.VerticalAnchor = MsoVerticalAnchor.msoAnchorMiddle;
                 ApplyTextStyles(textFrame, textElement);
@@ -707,7 +809,7 @@ namespace EdoliAddIn
 
                 ApplyTextStyles(textFrame, textElement);
                 AdjustTextPosition(textBox, x, y, textElement.Attribute("text-anchor")?.Value);
-                return new ShapeInfo { Shape = textBox, CenterX = x, CenterY = y };
+                return new ShapeInfo(textBox, x, y);
             }
         }
 
@@ -876,14 +978,24 @@ namespace EdoliAddIn
             // SVG의 y 좌표는 텍스트의 기준선을 나타내므로, 텍스트 높이의 약 70%를 빼줌
             // HACK: 이 값은 대략적인 것으로, 폰트에 따라 조정이 필요할 수 있음
             
-            textBox.Top = y - (textBox.Height / 2);
+            textBox.Top = y - GetApproximateLineHeight(textBox) * 0.7f;
+        }
+
+        public float GetApproximateLineHeight(PowerPoint.Shape textBox)
+        {
+            float totalHeight = textBox.Height;
+            string text = textBox.TextFrame.TextRange.Text;
+            string[] lines = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            int lineCount = lines.Length;
+
+            return totalHeight / lineCount;
         }
 
         private bool IsCloseEnough(float x, float y, ShapeInfo shape)
         {
             // 이 임계값은 조정할 수 있습니다.
-            float threshold = Math.Min(shape.Shape.Width, shape.Shape.Height) / 8;
-            return Math.Abs(x - shape.CenterX) < threshold && Math.Abs(y - shape.CenterY) < threshold;
+            float threshold = Math.Min(shape.Data.Width, shape.Data.Height) / 4;
+            return Math.Abs(x - shape.X) < threshold && Math.Abs(y - shape.Y) < threshold;
         }
 
         private bool IsShapeTextEmpty(PowerPoint.Shape shape)

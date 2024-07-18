@@ -11,7 +11,6 @@ namespace EdoliAddIn
 {
     public class SVGGradientParser
     {
-        // TODO: support radial gradient
         private XDocument svgDocument;
         private Dictionary<string, XElement> gradientDefs;
 

@@ -349,7 +349,6 @@
     <Compile Include="MathExt.cs" />
     <Compile Include="ImageExt.cs" />
     <Compile Include="SVGTool/ColorExt.cs" />
-    <Compile Include="SVGTool/CurveUtil.cs" />
     <Compile Include="SVGTool/SVGTool.cs" />
     <Compile Include="SVGTool/SVGStyleParser.cs" />
     <Compile Include="SVGTool/SVGGradientParser.cs" />
