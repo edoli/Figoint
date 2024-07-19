@@ -277,7 +277,7 @@ namespace EdoliAddIn
         private ShapeInfo DrawCircle(XElement circle)
         {
             float cx = float.Parse(GetAttribute(circle, "cx"));
-            float cy = float.Parse(GetAttribute(circle, "cx"));
+            float cy = float.Parse(GetAttribute(circle, "cy"));
             float r = float.Parse(GetAttribute(circle, "r"));
 
             var shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeOval, cx - r, cy - r, r * 2, r * 2);
