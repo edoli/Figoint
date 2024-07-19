@@ -95,6 +95,13 @@ namespace EdoliAddIn
                 case "text":
                     shapeInfo = DrawText(element);
                     break;
+                // Custom elements
+                case "grid-line":
+                    shapeInfo = DrawGridLine(element);
+                    break;
+                case "grid-rect":
+                    shapeInfo = DrawGridRect(element);
+                    break;
             }
 
             if (shapeInfo != null)
@@ -197,6 +204,78 @@ namespace EdoliAddIn
             float bottom = top + groupedShape.Height;
             centerX = (left + right) / 2;
             centerY = (top + bottom) / 2;
+
+            return new ShapeInfo(groupedShape, centerX, centerY);
+        }
+
+        private ShapeInfo DrawGridLine(XElement grid)
+        {
+            float x = float.Parse(GetAttribute(grid, "x", "0"));
+            float y = float.Parse(GetAttribute(grid, "y", "0"));
+            float width = float.Parse(GetAttribute(grid, "width"));
+            float height = float.Parse(GetAttribute(grid, "height"));
+            int cols = int.Parse(GetAttribute(grid, "cols"));
+            int rows = int.Parse(GetAttribute(grid, "rows"));
+
+            float cellWidth = width / cols;
+            float cellHeight = height / rows;
+
+            List<PowerPoint.Shape> shapes = new List<PowerPoint.Shape>();
+
+            // Draw vertical lines
+            for (int i = 0; i <= cols; i++)
+            {
+                float lineX = i * cellWidth;
+                shapes.Add(slide.Shapes.AddLine(lineX, 0, lineX, height));
+            }
+
+            // Draw horizontal lines
+            for (int i = 0; i <= rows; i++)
+            {
+                float lineY = i * cellHeight;
+                shapes.Add(slide.Shapes.AddLine(0, lineY, width, lineY));
+            }
+
+            var groupedShape = slide.Shapes.Range(shapes.Select(s => s.Name).ToArray()).Group();
+            groupedShape.Left = x;
+            groupedShape.Top = y;
+
+            float centerX = x + width / 2;
+            float centerY = y + height / 2;
+
+            return new ShapeInfo(groupedShape, centerX, centerY);
+        }
+
+        private ShapeInfo DrawGridRect(XElement grid)
+        {
+            float x = float.Parse(GetAttribute(grid, "x", "0"));
+            float y = float.Parse(GetAttribute(grid, "y", "0"));
+            float width = float.Parse(GetAttribute(grid, "width"));
+            float height = float.Parse(GetAttribute(grid, "height"));
+            int cols = int.Parse(GetAttribute(grid, "cols"));
+            int rows = int.Parse(GetAttribute(grid, "rows"));
+
+            float cellWidth = width / cols;
+            float cellHeight = height / rows;
+
+            List<PowerPoint.Shape> shapes = new List<PowerPoint.Shape>();
+
+            for (int i = 0; i <= cols; i++)
+            {
+                for (int j = 0; j <= rows; j++)
+                {
+                    float lineX = i * cellWidth;
+                    float lineY = j * cellHeight;
+                    shapes.Add(slide.Shapes.AddShape(MsoAutoShapeType.msoShapeRectangle, lineX, lineY, cellWidth, cellHeight));
+                }
+            }
+
+            var groupedShape = slide.Shapes.Range(shapes.Select(s => s.Name).ToArray()).Group();
+            groupedShape.Left = x;
+            groupedShape.Top = y;
+
+            float centerX = x + width / 2;
+            float centerY = y + height / 2;
 
             return new ShapeInfo(groupedShape, centerX, centerY);
         }
@@ -815,6 +894,7 @@ namespace EdoliAddIn
             ShapeInfo nearestShape = currentQuadTree.FindNearest(x, y);
 
             // HACK: Currently only allow middle aligned text
+            // TODO: 모든 도형에 대해서 내부 텍스트 추가 하면 안될듯.
             if (nearestShape != null 
                 && IsCloseEnough(centerX, centerY, totalHeight, nearestShape)
                 && IsShapeTextEmpty(nearestShape.Data)
