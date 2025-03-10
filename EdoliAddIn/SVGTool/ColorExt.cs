@@ -20,6 +20,8 @@ namespace EdoliAddIn
                     int.Parse(rgbMatch.Groups[2].Value),
                     int.Parse(rgbMatch.Groups[3].Value)
                 );
+            } else if (colorString == "none") {
+                return new MyColor(Color.FromArgb(0, 0, 0, 0), 0);
             } else {
                 // RGB 형식 확인
                 Match rgbaMatch = Regex.Match(colorString, @"^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)$");
