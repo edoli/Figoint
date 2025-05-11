@@ -348,16 +348,16 @@
     <Compile Include="Expressive\VariableProviderDictionary.cs" />
     <Compile Include="MathExt.cs" />
     <Compile Include="ImageExt.cs" />
-    <Compile Include="SVGTool/ColorExt.cs" />
-    <Compile Include="SVGTool/SVGTool.cs" />
-    <Compile Include="SVGTool/SVGStyleParser.cs" />
-    <Compile Include="SVGTool/SVGGradientParser.cs" />
-    <Compile Include="SVGTool/SVGStrokeDashArrayParser.cs" />
-    <Compile Include="SVGTool/SVGTransformParser.cs" />
-    <Compile Include="Util/SearchTree.cs" />
-    <Compile Include="Util/QuadTree.cs" />
-    <Compile Include="Util/KdTree.cs" />
-    <Compile Include="Util/RTree.cs" />
+    <Compile Include="SVGTool\ColorExt.cs" />
+    <Compile Include="SVGTool\SVGGradientParser.cs" />
+    <Compile Include="SVGTool\SVGStrokeDashArrayParser.cs" />
+    <Compile Include="SVGTool\SVGStyleParser.cs" />
+    <Compile Include="SVGTool\SVGTool.cs" />
+    <Compile Include="SVGTool\SVGTransformParser.cs" />
+    <Compile Include="Util\SearchTree.cs" />
+    <Compile Include="Util\QuadTree.cs" />
+    <Compile Include="Util\KdTree.cs" />
+    <Compile Include="Util\RTree.cs" />
     <Compile Include="DebugTool.cs" />
     <Compile Include="TextTool.cs" />
     <Compile Include="ImageTool.cs" />
@@ -380,6 +380,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="EdoliAddin_Temporary.pfx" />
+    <None Include="EdoliAddIn_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -407,19 +408,20 @@
     <Content Include="Resources\icon_begin_arrow_size_down.png" />
     <Content Include="Resources\icon_begin_arrow_size_up.png" />
     <Content Include="Resources\icon_begin_arrow_toggle.png" />
+    <Content Include="Resources\icon_draw_angle.png" />
     <Content Include="Resources\icon_end_arrow_size_down.png" />
     <Content Include="Resources\icon_end_arrow_size_up.png" />
     <Content Include="Resources\icon_end_arrow_toggle.png" />
     <Content Include="Resources\icon_grid.png" />
-    <None Include="Resources\icon_image_trim.png" />
-    <None Include="Resources\icon_image_invert.png" />
+    <Content Include="Resources\icon_image_trim.png" />
+    <Content Include="Resources\icon_image_invert.png" />
     <Content Include="Resources\icon_label_bottom.png" />
     <Content Include="Resources\icon_label_group.png" />
     <Content Include="Resources\icon_label_left.png" />
     <Content Include="Resources\icon_label_right.png" />
     <Content Include="Resources\icon_label_top.png" />
-    <None Include="Resources\icon_resize_width.png" />
-    <None Include="Resources\icon_resize_height.png" />
+    <Content Include="Resources\icon_resize_width.png" />
+    <Content Include="Resources\icon_resize_height.png" />
     <Content Include="Resources\icon_snap_diag_downright.png" />
     <Content Include="Resources\icon_snap_diag_upright.png" />
     <Content Include="Resources\icon_swap_cycle.png" />
@@ -434,10 +436,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>EdoliAddIn_Temporary.pfx</ManifestKeyFile>
+    <ManifestKeyFile>EdoliAddIn_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>AB9600A4C9B1F1CF07CCC3EDDD48802D44C1C3B8</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>CAFC056A8BB81F4D7BB9E23AE781B380C5B94CE6</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
