@@ -5,8 +5,11 @@
    viewBox="0 0 210 297"
    version="1.1"
    id="svg5"
-   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    sodipodi:docname="icon.svg"
+   inkscape:export-filename="icon_draw_angle.png"
+   inkscape:export-xdpi="18"
+   inkscape:export-ydpi="18"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -36,14 +39,14 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="px"
      showgrid="false"
-     inkscape:zoom="0.25000001"
-     inkscape:cx="833.99998"
-     inkscape:cy="1182"
-     inkscape:window-width="1634"
-     inkscape:window-height="1081"
-     inkscape:window-x="1661"
-     inkscape:window-y="632"
-     inkscape:window-maximized="0"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="1518.5118"
+     inkscape:cy="623.31461"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="-11"
+     inkscape:window-y="1322"
+     inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
      inkscape:snap-bbox="true"
      inkscape:bbox-nodes="true"
@@ -61,7 +64,9 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:lockguides="true"
-     inkscape:document-rotation="0" />
+     inkscape:document-rotation="0"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
   <defs
      id="defs2">
     <linearGradient
@@ -206,7 +211,7 @@
     <linearGradient
        id="linearGradient10065"
        inkscape:swatch="solid"
-       gradientTransform="matrix(-0.13284721,0.08458086,-0.32836853,-0.03441198,-5894.7645,-2574.4432)">
+       gradientTransform="matrix(-0.03514916,0.02237869,-0.08688084,-0.00910484,-1559.4464,-682.41483)">
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -733,20 +738,26 @@
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient10065"
-       id="linearGradient8067"
-       x1="414.32617"
-       y1="112.61229"
-       x2="467.68936"
-       y2="112.61229"
-       gradientUnits="userSpaceOnUse" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient10065"
-       id="linearGradient8073"
+       id="linearGradient10"
+       gradientUnits="userSpaceOnUse"
        x1="345.85172"
        y1="112.23812"
        x2="399.2149"
-       y2="112.23812"
+       y2="112.23812" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient10065"
+       id="linearGradient11"
+       gradientUnits="userSpaceOnUse"
+       x1="414.32617"
+       y1="112.61229"
+       x2="467.68936"
+       y2="112.61229" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient12653"
+       id="linearGradient12"
+       gradientTransform="matrix(-0.03514916,0.02237869,-0.08688084,-0.00910484,-1559.4464,-682.41483)"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <g
@@ -2829,34 +2840,36 @@
          y="100.41457" />
     </g>
     <g
-       id="g7002">
+       id="g7002"
+       transform="translate(69.596982)">
       <text
          xml:space="preserve"
-         style="font-style:normal;font-weight:normal;font-size:33.8667px;line-height:1.25;font-family:sans-serif;fill:url(#linearGradient8073);fill-opacity:1.0;stroke:none;stroke-width:0.264583"
+         style="font-style:normal;font-weight:normal;font-size:33.8667px;line-height:1.25;font-family:sans-serif;fill:url(#linearGradient10);fill-opacity:1;stroke:none;stroke-width:0.264583"
          x="345.10757"
          y="122.27576"
          id="text4001"><tspan
            sodipodi:role="line"
            id="tspan3999"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:33.8667px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI';stroke-width:0.264583;fill-opacity:1.0;fill:url(#linearGradient8073)"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:33.8667px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI';fill:url(#linearGradient10);fill-opacity:1;stroke-width:0.264583"
            x="345.10757"
            y="122.27576">f(x)</tspan></text>
       <path
-         style="fill:none;stroke:url(#linearGradient10065);stroke-width:4.23333;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-variation-settings:normal;opacity:1;vector-effect:none;fill-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
+         style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:url(#linearGradient10065);stroke-width:4.23333;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
          d="m 343.68187,155.47068 27.50203,-21.5152 27.68912,20.57976"
          id="path5461" />
     </g>
     <g
-       id="g7007">
+       id="g7007"
+       transform="translate(69.596982)">
       <text
          xml:space="preserve"
-         style="font-style:normal;font-weight:normal;font-size:33.8667px;line-height:1.25;font-family:sans-serif;fill:url(#linearGradient8067);fill-opacity:1.0;stroke:none;stroke-width:0.264583"
+         style="font-style:normal;font-weight:normal;font-size:33.8667px;line-height:1.25;font-family:sans-serif;fill:url(#linearGradient11);fill-opacity:1;stroke:none;stroke-width:0.264583"
          x="413.58203"
          y="122.64993"
          id="text4001-2"><tspan
            sodipodi:role="line"
            id="tspan3999-2"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:33.8667px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI';stroke-width:0.264583;fill-opacity:1.0;fill:url(#linearGradient8067)"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:33.8667px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI';fill:url(#linearGradient11);fill-opacity:1;stroke-width:0.264583"
            x="413.58203"
            y="122.64993">f(x)</tspan></text>
       <path
@@ -2947,6 +2960,19 @@
          height="25.418804"
          x="306.90729"
          y="197.50725" />
+    </g>
+    <g
+       id="g12">
+      <path
+         style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:url(#linearGradient12);stroke-width:4.23336;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:159.987;stroke-opacity:1;-inkscape-stroke:none"
+         d="m 363.18449,122.92551 c 0,0 7.62904,3.14845 10.67175,9.23387 3.04271,6.08541 0.36648,13.40385 0.36648,13.40385"
+         id="path12"
+         sodipodi:nodetypes="csc" />
+      <path
+         style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:url(#linearGradient10065);stroke-width:4.23335;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:42.33;stroke-opacity:1;-inkscape-stroke:none;stop-color:#000000;stop-opacity:1"
+         d="m 378.33867,104.31019 -30.30837,37.23064 52.38484,8.04481"
+         id="path11"
+         sodipodi:nodetypes="ccc" />
     </g>
   </g>
 </svg>

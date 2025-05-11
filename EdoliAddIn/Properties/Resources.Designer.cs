@@ -143,6 +143,16 @@ namespace EdoliAddIn.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icon_draw_angle {
+            get {
+                object obj = ResourceManager.GetObject("icon_draw_angle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icon_end_arrow_size_down {
             get {
                 object obj = ResourceManager.GetObject("icon_end_arrow_size_down", resourceCulture);
