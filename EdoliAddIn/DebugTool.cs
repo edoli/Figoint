@@ -1,4 +1,5 @@
 using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace EdoliAddIn
         {
             AddButton("ShowConnectors", ShowConnectors);
             AddButton("ConnectAll", ShapeTool.ConnectAllCandidates);
+            AddButton("TestShape", TestShape);
             numConnector = AddField("NumConnector");
             isConnector = AddField("isConnector");
             typeField = AddField("Type");
@@ -52,8 +54,22 @@ namespace EdoliAddIn
                 var nodes = shape.Nodes;
                 node1.Text = nodes.Count > 0 ? NodeToString(nodes[1]) : "";
                 node2.Text = nodes.Count > 1 ? NodeToString(nodes[nodes.Count]) : "";
-                
             }
+        }
+
+        public static void TestShape()
+        {
+            PowerPoint.Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+
+            PowerPoint.FreeformBuilder freeform = slide.Shapes.BuildFreeform(MsoEditingType.msoEditingCorner, 0, 0);
+
+            freeform.AddNodes(MsoSegmentType.msoSegmentLine, MsoEditingType.msoEditingAuto, 
+                100, 100, 200, 200);
+
+            freeform.AddNodes(MsoSegmentType.msoSegmentLine, MsoEditingType.msoEditingAuto, 
+                300, 100, 400, 200);
+
+            PowerPoint.Shape shape = freeform.ConvertToShape();
         }
 
         public static string NodeToString(PowerPoint.ShapeNode node)
