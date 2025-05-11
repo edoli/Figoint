@@ -36,6 +36,19 @@
         {
             this.tab1 = this.Factory.CreateRibbonTab();
             this.shape = this.Factory.CreateRibbonGroup();
+            this.alignGroup = this.Factory.CreateRibbonGroup();
+            this.groupGrid = this.Factory.CreateRibbonGroup();
+            this.gridPadding = this.Factory.CreateRibbonEditBox();
+            this.gridNumColumn = this.Factory.CreateRibbonEditBox();
+            this.equationGroup = this.Factory.CreateRibbonGroup();
+            this.box1 = this.Factory.CreateRibbonBox();
+            this.curveStart = this.Factory.CreateRibbonEditBox();
+            this.curveEnd = this.Factory.CreateRibbonEditBox();
+            this.curveOfEquationX = this.Factory.CreateRibbonEditBox();
+            this.curveOfEquationY = this.Factory.CreateRibbonEditBox();
+            this.animationGroup = this.Factory.CreateRibbonGroup();
+            this.animationName = this.Factory.CreateRibbonEditBox();
+            this.followAnimation = this.Factory.CreateRibbonButton();
             this.beginArrowToggle = this.Factory.CreateRibbonButton();
             this.beginArrowSizeUp = this.Factory.CreateRibbonButton();
             this.beginArrowSizeDown = this.Factory.CreateRibbonButton();
@@ -45,7 +58,7 @@
             this.connectShapeByLine = this.Factory.CreateRibbonButton();
             this.trimImage = this.Factory.CreateRibbonButton();
             this.SVGTool = this.Factory.CreateRibbonButton();
-            this.alignGroup = this.Factory.CreateRibbonGroup();
+            this.drawAngle = this.Factory.CreateRibbonButton();
             this.labelBottom = this.Factory.CreateRibbonButton();
             this.labelTop = this.Factory.CreateRibbonButton();
             this.transpose = this.Factory.CreateRibbonButton();
@@ -61,21 +74,9 @@
             this.alignGrid = this.Factory.CreateRibbonButton();
             this.resizeWidth = this.Factory.CreateRibbonButton();
             this.resizeHeight = this.Factory.CreateRibbonButton();
-            this.groupGrid = this.Factory.CreateRibbonGroup();
             this.grid = this.Factory.CreateRibbonButton();
-            this.gridPadding = this.Factory.CreateRibbonEditBox();
-            this.gridNumColumn = this.Factory.CreateRibbonEditBox();
-            this.equationGroup = this.Factory.CreateRibbonGroup();
-            this.box1 = this.Factory.CreateRibbonBox();
             this.curveOfEquation = this.Factory.CreateRibbonButton();
             this.polylineOfEquation = this.Factory.CreateRibbonButton();
-            this.curveStart = this.Factory.CreateRibbonEditBox();
-            this.curveEnd = this.Factory.CreateRibbonEditBox();
-            this.curveOfEquationX = this.Factory.CreateRibbonEditBox();
-            this.curveOfEquationY = this.Factory.CreateRibbonEditBox();
-            this.animationGroup = this.Factory.CreateRibbonGroup();
-            this.animationName = this.Factory.CreateRibbonEditBox();
-            this.followAnimation = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.shape.SuspendLayout();
             this.alignGroup.SuspendLayout();
@@ -107,9 +108,139 @@
             this.shape.Items.Add(this.endArrowSizeDown);
             this.shape.Items.Add(this.connectShapeByLine);
             this.shape.Items.Add(this.trimImage);
+            this.shape.Items.Add(this.drawAngle);
             this.shape.Items.Add(this.SVGTool);
             this.shape.Label = "Shape";
             this.shape.Name = "shape";
+            // 
+            // alignGroup
+            // 
+            this.alignGroup.Items.Add(this.labelBottom);
+            this.alignGroup.Items.Add(this.labelTop);
+            this.alignGroup.Items.Add(this.transpose);
+            this.alignGroup.Items.Add(this.labelLeft);
+            this.alignGroup.Items.Add(this.labelRight);
+            this.alignGroup.Items.Add(this.groupLabel);
+            this.alignGroup.Items.Add(this.alignPrevSlide);
+            this.alignGroup.Items.Add(this.swapCycle);
+            this.alignGroup.Items.Add(this.snapDownRight);
+            this.alignGroup.Items.Add(this.alignNextSlide);
+            this.alignGroup.Items.Add(this.swapCycleReverse);
+            this.alignGroup.Items.Add(this.snapUpRight);
+            this.alignGroup.Items.Add(this.alignGrid);
+            this.alignGroup.Items.Add(this.resizeWidth);
+            this.alignGroup.Items.Add(this.resizeHeight);
+            this.alignGroup.Label = "Align";
+            this.alignGroup.Name = "alignGroup";
+            // 
+            // groupGrid
+            // 
+            this.groupGrid.Items.Add(this.grid);
+            this.groupGrid.Items.Add(this.gridPadding);
+            this.groupGrid.Items.Add(this.gridNumColumn);
+            this.groupGrid.Label = "Grid";
+            this.groupGrid.Name = "groupGrid";
+            // 
+            // gridPadding
+            // 
+            this.gridPadding.Label = "Padding";
+            this.gridPadding.Name = "gridPadding";
+            this.gridPadding.ScreenTip = "Grid Padding";
+            this.gridPadding.SizeString = "000";
+            this.gridPadding.SuperTip = "Set the padding between grid items";
+            this.gridPadding.Text = "0";
+            // 
+            // gridNumColumn
+            // 
+            this.gridNumColumn.Label = "Column";
+            this.gridNumColumn.Name = "gridNumColumn";
+            this.gridNumColumn.ScreenTip = "Grid Columns";
+            this.gridNumColumn.SizeString = "000";
+            this.gridNumColumn.SuperTip = "Set the number of columns in the grid";
+            this.gridNumColumn.Text = "0";
+            // 
+            // equationGroup
+            // 
+            this.equationGroup.Items.Add(this.box1);
+            this.equationGroup.Items.Add(this.curveOfEquationX);
+            this.equationGroup.Items.Add(this.curveOfEquationY);
+            this.equationGroup.Label = "Equation";
+            this.equationGroup.Name = "equationGroup";
+            // 
+            // box1
+            // 
+            this.box1.Items.Add(this.curveOfEquation);
+            this.box1.Items.Add(this.polylineOfEquation);
+            this.box1.Items.Add(this.curveStart);
+            this.box1.Items.Add(this.curveEnd);
+            this.box1.Name = "box1";
+            // 
+            // curveStart
+            // 
+            this.curveStart.Label = "editBox1";
+            this.curveStart.Name = "curveStart";
+            this.curveStart.ScreenTip = "Curve Start";
+            this.curveStart.ShowLabel = false;
+            this.curveStart.SizeString = "00000";
+            this.curveStart.SuperTip = "Set the starting point for the curve";
+            this.curveStart.Text = "0";
+            this.curveStart.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
+            // 
+            // curveEnd
+            // 
+            this.curveEnd.Label = "-";
+            this.curveEnd.Name = "curveEnd";
+            this.curveEnd.ScreenTip = "Curve End";
+            this.curveEnd.SizeString = "00000";
+            this.curveEnd.SuperTip = "Set the ending point for the curve";
+            this.curveEnd.Text = "1";
+            this.curveEnd.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
+            // 
+            // curveOfEquationX
+            // 
+            this.curveOfEquationX.Label = "X";
+            this.curveOfEquationX.Name = "curveOfEquationX";
+            this.curveOfEquationX.ScreenTip = "X Equation";
+            this.curveOfEquationX.SizeString = "000000000000000000";
+            this.curveOfEquationX.SuperTip = "Enter the equation for the X coordinate";
+            this.curveOfEquationX.Text = "t";
+            this.curveOfEquationX.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
+            // 
+            // curveOfEquationY
+            // 
+            this.curveOfEquationY.Label = "Y";
+            this.curveOfEquationY.Name = "curveOfEquationY";
+            this.curveOfEquationY.ScreenTip = "Y Equation";
+            this.curveOfEquationY.SizeString = "000000000000000000";
+            this.curveOfEquationY.SuperTip = "Enter the equation for the Y coordinate";
+            this.curveOfEquationY.Text = "t";
+            this.curveOfEquationY.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
+            // 
+            // animationGroup
+            // 
+            this.animationGroup.Items.Add(this.animationName);
+            this.animationGroup.Items.Add(this.followAnimation);
+            this.animationGroup.Label = "Animation";
+            this.animationGroup.Name = "animationGroup";
+            // 
+            // animationName
+            // 
+            this.animationName.Label = "Animation Name";
+            this.animationName.Name = "animationName";
+            this.animationName.ScreenTip = "Animation Name";
+            this.animationName.ShowLabel = false;
+            this.animationName.SizeString = "00000000";
+            this.animationName.SuperTip = "Enter the name of the animation";
+            this.animationName.Text = null;
+            this.animationName.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.animation_TextChanged);
+            // 
+            // followAnimation
+            // 
+            this.followAnimation.Label = "Follow";
+            this.followAnimation.Name = "followAnimation";
+            this.followAnimation.ScreenTip = "Follow Animation";
+            this.followAnimation.SuperTip = "Make the selected object follow the animation path";
+            this.followAnimation.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.followAnimation_Click);
             // 
             // beginArrowToggle
             // 
@@ -208,25 +339,16 @@
             this.SVGTool.SuperTip = "Trim blank area of images";
             this.SVGTool.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.SVGTool_Click);
             // 
-            // alignGroup
+            // drawAngle
             // 
-            this.alignGroup.Items.Add(this.labelBottom);
-            this.alignGroup.Items.Add(this.labelTop);
-            this.alignGroup.Items.Add(this.transpose);
-            this.alignGroup.Items.Add(this.labelLeft);
-            this.alignGroup.Items.Add(this.labelRight);
-            this.alignGroup.Items.Add(this.groupLabel);
-            this.alignGroup.Items.Add(this.alignPrevSlide);
-            this.alignGroup.Items.Add(this.swapCycle);
-            this.alignGroup.Items.Add(this.snapDownRight);
-            this.alignGroup.Items.Add(this.alignNextSlide);
-            this.alignGroup.Items.Add(this.swapCycleReverse);
-            this.alignGroup.Items.Add(this.snapUpRight);
-            this.alignGroup.Items.Add(this.alignGrid);
-            this.alignGroup.Items.Add(this.resizeWidth);
-            this.alignGroup.Items.Add(this.resizeHeight);
-            this.alignGroup.Label = "Align";
-            this.alignGroup.Name = "alignGroup";
+            this.drawAngle.Image = global::EdoliAddIn.Properties.Resources.icon_draw_angle;
+            this.drawAngle.Label = "Draw angle";
+            this.drawAngle.Name = "drawAngle";
+            this.drawAngle.ScreenTip = "Draw angle";
+            this.drawAngle.ShowImage = true;
+            this.drawAngle.ShowLabel = false;
+            this.drawAngle.SuperTip = "Draw angle";
+            this.drawAngle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawAngle_Click);
             // 
             // labelBottom
             // 
@@ -393,14 +515,6 @@
             this.resizeHeight.SuperTip = "Resize the height of selected objects to match the last selected object";
             this.resizeHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.resizeHeight_Click);
             // 
-            // groupGrid
-            // 
-            this.groupGrid.Items.Add(this.grid);
-            this.groupGrid.Items.Add(this.gridPadding);
-            this.groupGrid.Items.Add(this.gridNumColumn);
-            this.groupGrid.Label = "Grid";
-            this.groupGrid.Name = "groupGrid";
-            // 
             // grid
             // 
             this.grid.Image = global::EdoliAddIn.Properties.Resources.icon_grid;
@@ -410,40 +524,6 @@
             this.grid.ShowImage = true;
             this.grid.SuperTip = "Create a grid of shapes based on the selected shapes";
             this.grid.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.grid_Click);
-            // 
-            // gridPadding
-            // 
-            this.gridPadding.Label = "Padding";
-            this.gridPadding.Name = "gridPadding";
-            this.gridPadding.ScreenTip = "Grid Padding";
-            this.gridPadding.SizeString = "000";
-            this.gridPadding.SuperTip = "Set the padding between grid items";
-            this.gridPadding.Text = "0";
-            // 
-            // gridNumColumn
-            // 
-            this.gridNumColumn.Label = "Column";
-            this.gridNumColumn.Name = "gridNumColumn";
-            this.gridNumColumn.ScreenTip = "Grid Columns";
-            this.gridNumColumn.SizeString = "000";
-            this.gridNumColumn.SuperTip = "Set the number of columns in the grid";
-            this.gridNumColumn.Text = "0";
-            // 
-            // equationGroup
-            // 
-            this.equationGroup.Items.Add(this.box1);
-            this.equationGroup.Items.Add(this.curveOfEquationX);
-            this.equationGroup.Items.Add(this.curveOfEquationY);
-            this.equationGroup.Label = "Equation";
-            this.equationGroup.Name = "equationGroup";
-            // 
-            // box1
-            // 
-            this.box1.Items.Add(this.curveOfEquation);
-            this.box1.Items.Add(this.polylineOfEquation);
-            this.box1.Items.Add(this.curveStart);
-            this.box1.Items.Add(this.curveEnd);
-            this.box1.Name = "box1";
             // 
             // curveOfEquation
             // 
@@ -466,73 +546,6 @@
             this.polylineOfEquation.ShowLabel = false;
             this.polylineOfEquation.SuperTip = "Create a polyline based on the entered equation";
             this.polylineOfEquation.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.polylineOfEquation_Click);
-            // 
-            // curveStart
-            // 
-            this.curveStart.Label = "editBox1";
-            this.curveStart.Name = "curveStart";
-            this.curveStart.ScreenTip = "Curve Start";
-            this.curveStart.ShowLabel = false;
-            this.curveStart.SizeString = "00000";
-            this.curveStart.SuperTip = "Set the starting point for the curve";
-            this.curveStart.Text = "0";
-            this.curveStart.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
-            // 
-            // curveEnd
-            // 
-            this.curveEnd.Label = "-";
-            this.curveEnd.Name = "curveEnd";
-            this.curveEnd.ScreenTip = "Curve End";
-            this.curveEnd.SizeString = "00000";
-            this.curveEnd.SuperTip = "Set the ending point for the curve";
-            this.curveEnd.Text = "1";
-            this.curveEnd.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
-            // 
-            // curveOfEquationX
-            // 
-            this.curveOfEquationX.Label = "X";
-            this.curveOfEquationX.Name = "curveOfEquationX";
-            this.curveOfEquationX.ScreenTip = "X Equation";
-            this.curveOfEquationX.SizeString = "000000000000000000";
-            this.curveOfEquationX.SuperTip = "Enter the equation for the X coordinate";
-            this.curveOfEquationX.Text = "t";
-            this.curveOfEquationX.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
-            // 
-            // curveOfEquationY
-            // 
-            this.curveOfEquationY.Label = "Y";
-            this.curveOfEquationY.Name = "curveOfEquationY";
-            this.curveOfEquationY.ScreenTip = "Y Equation";
-            this.curveOfEquationY.SizeString = "000000000000000000";
-            this.curveOfEquationY.SuperTip = "Enter the equation for the Y coordinate";
-            this.curveOfEquationY.Text = "t";
-            this.curveOfEquationY.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.curve_TextChanged);
-            // 
-            // animationGroup
-            // 
-            this.animationGroup.Items.Add(this.animationName);
-            this.animationGroup.Items.Add(this.followAnimation);
-            this.animationGroup.Label = "Animation";
-            this.animationGroup.Name = "animationGroup";
-            // 
-            // animationName
-            // 
-            this.animationName.Label = "Animation Name";
-            this.animationName.Name = "animationName";
-            this.animationName.ScreenTip = "Animation Name";
-            this.animationName.ShowLabel = false;
-            this.animationName.SizeString = "00000000";
-            this.animationName.SuperTip = "Enter the name of the animation";
-            this.animationName.Text = null;
-            this.animationName.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.animation_TextChanged);
-            // 
-            // followAnimation
-            // 
-            this.followAnimation.Label = "Follow";
-            this.followAnimation.Name = "followAnimation";
-            this.followAnimation.ScreenTip = "Follow Animation";
-            this.followAnimation.SuperTip = "Make the selected object follow the animation path";
-            this.followAnimation.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.followAnimation_Click);
             // 
             // EdoliRibbon
             // 
@@ -604,6 +617,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton alignLines;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton trimLines;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton SVGTool;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton drawAngle;
     }
 
     partial class ThisRibbonCollection

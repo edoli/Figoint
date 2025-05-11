@@ -127,6 +127,10 @@ namespace EdoliAddIn
         {
             ShapeTool.ConnectShapesByLine();
         }
+        private void drawAngle_Click(object sender, RibbonControlEventArgs e)
+        {
+            ShapeTool.DrawAngle();
+        }
 
         private void curveOfEquation_Click(object sender, RibbonControlEventArgs e)
         {

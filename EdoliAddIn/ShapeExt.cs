@@ -386,5 +386,15 @@ namespace EdoliAddIn
             }
             return Anchor.None;
         }
+
+        public static Vector2[] GetLineVertices(this PowerPoint.Shape shape)
+        {
+            // 현재로서는 알아낼 방법이 없음
+            return new Vector2[]
+            {
+                new Vector2(shape.Left(), shape.Top()),
+                new Vector2(shape.Left() + shape.Width(), shape.Top() + shape.Height())
+            };
+        }
     }
 }
