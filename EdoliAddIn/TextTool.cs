@@ -24,19 +24,23 @@ namespace EdoliAddIn
         {
             Globals.ThisAddIn.Application.StartNewUndoEntry();
             ReplaceSelectedText(s => {
-                if (s.Trim().Last() == '=')
+                var lines = s.Split(new[] { '\n', '\r' }, StringSplitOptions.None);
+                return string.Join("\n", lines.Select(line =>
                 {
-                    // if expression ends with '=', add result of expression after '='
-                    // e.g. "1+2=" => "1+2=3"
-                    var sTrim = s.Trim();
-                    return s + new Expression(sTrim.Substring(0, sTrim.Length - 1), ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
-                }
-                else
-                {
-                    // if expression does not end with '=', replace expression with result
-                    // e.g. "1+2" => "3"
-                    return new Expression(s, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
-                }
+                    var trimmedLine = line.Trim();
+                    if (trimmedLine.EndsWith("="))
+                    {
+                        // if line ends with '=', add result of expression after '='
+                        // e.g. "1+2=" => "1+2=3"
+                        return line + new Expression(trimmedLine.Substring(0, trimmedLine.Length - 1), ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                    }
+                    else
+                    {
+                        // if line does not end with '=', replace line with result
+                        // e.g. "1+2" => "3"
+                        return new Expression(trimmedLine, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                    }
+                }));
             });
         }
 
