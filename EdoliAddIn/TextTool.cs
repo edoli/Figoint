@@ -2,6 +2,7 @@ using System;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using System.Windows.Forms;
 using Expressive;
+using System.Linq;
 
 namespace EdoliAddIn
 {
@@ -23,7 +24,19 @@ namespace EdoliAddIn
         {
             Globals.ThisAddIn.Application.StartNewUndoEntry();
             ReplaceSelectedText(s => {
-                return new Expression(s, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                if (s.Trim().Last() == '=')
+                {
+                    // if expression ends with '=', add result of expression after '='
+                    // e.g. "1+2=" => "1+2=3"
+                    var sTrim = s.Trim();
+                    return s + new Expression(sTrim.Substring(0, sTrim.Length - 1), ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                }
+                else
+                {
+                    // if expression does not end with '=', replace expression with result
+                    // e.g. "1+2" => "3"
+                    return new Expression(s, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                }
             });
         }
 
