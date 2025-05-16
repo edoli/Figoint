@@ -453,26 +453,47 @@ namespace EdoliAddIn
                 }
             }
         }
-
         private static void DrawAnglesForPolygon(PowerPoint.Shape polygon, PowerPoint.Slide slide)
         {
             int nodeCount = polygon.Nodes.Count;
             if (nodeCount < 3) return;
 
-            // 모든 꼭지점 좌표 추출
-            Vector2[] vertices = new Vector2[nodeCount];
+            // 실제 꼭지점 노드만 추출
+            List<Vector2> vertexList = new List<Vector2>();
             for (int i = 1; i <= nodeCount; i++)
             {
-                var points = polygon.Nodes[i].Points;
-                vertices[i - 1] = new Vector2((float)points[1, 1], (float)points[1, 2]);
+                var node = polygon.Nodes[i];
+                var segmentType = node.SegmentType;
+                var editingType = node.EditingType;
+
+                if (i > 1 && segmentType == MsoSegmentType.msoSegmentCurve)
+                {
+                    // 첫 노드는 무조건 꼭지점
+                    // 그 이후로 Curve가 발견되면 2개 뒤의 노드가 꼭지점 (2개는 컨트롤 포인트)
+                    var points = polygon.Nodes[i + 2].Points;
+                    vertexList.Add(new Vector2((float)points[1, 1], (float)points[1, 2]));
+                    i += 2;
+                }
+                else
+                {
+                    var points = node.Points;
+                    vertexList.Add(new Vector2((float)points[1, 1], (float)points[1, 2]));
+                }
             }
+
+            // 꼭지점이 3개 미만이면 함수 종료
+            if (vertexList.Count < 3) return;
+
+            // 벡터 배열로 변환
+            Vector2[] vertices = vertexList.ToArray();
+            int vertexCount = vertices.Length;
 
             // 처음 꼭지점과 마지막 꼭지점이 동일할 경우 제거
             var isClosed = false;
-            if (vertices[0] == vertices[nodeCount - 1])
+            if (vertexCount > 1 && vertices[0] == vertices[vertexCount - 1])
             {
-                nodeCount--;
-                Array.Resize(ref vertices, nodeCount);
+                vertexCount--;
+                Array.Resize(ref vertices, vertexCount);
                 isClosed = true;
             }
 
@@ -481,18 +502,18 @@ namespace EdoliAddIn
             if (isClosed)
             {
                 startIndex = 0;
-                endIndex = nodeCount;
+                endIndex = vertexCount;
             }
             else
             {
                 startIndex = 1;
-                endIndex = nodeCount - 1;
+                endIndex = vertexCount - 1;
             }
 
             for (int i = startIndex; i < endIndex; i++)
             {
-                int prev = (i - 1 + nodeCount) % nodeCount;
-                int next = (i + 1) % nodeCount;
+                int prev = (i - 1 + vertexCount) % vertexCount;
+                int next = (i + 1) % vertexCount;
 
                 Vector2 v1 = vertices[prev] - vertices[i];
                 Vector2 v2 = vertices[next] - vertices[i];
