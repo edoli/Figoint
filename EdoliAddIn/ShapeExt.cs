@@ -467,14 +467,49 @@ namespace EdoliAddIn
             return vertexList.ToArray();
         }
 
-        public static Vector2[] GetLineVertices(this PowerPoint.Shape shape)
+        /// <summary>
+        /// 임시로 line을 만들고 line을 connector에 연결해 가면서 connector의 위치를 추정
+        /// </summary>
+        public static Vector2[] GetConnectors(this PowerPoint.Shape shape)
         {
-            // 현재로서는 알아낼 방법이 없음
-            return new Vector2[]
+            PowerPoint.Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+
+            var connectors = new List<Vector2>();
+
+            var line = slide.Shapes.AddLine(-1000, -1000, 10, 10);
+
+            for (int i = 0; i < shape.ConnectionSiteCount; i++)
             {
-                new Vector2(shape.Left(), shape.Top()),
-                new Vector2(shape.Left() + shape.Width(), shape.Top() + shape.Height())
-            };
+                line.ConnectorFormat.EndConnect(shape, i + 1);
+                float x = line.Left + line.Width;
+                float y = line.Top + line.Height;
+
+                connectors.Add(new Vector2(x, y));
+            }
+
+            line.Delete();
+
+            return connectors.ToArray();
+        }
+
+        /// <summary>
+        /// 일부 shape들에 대해 vertices 위치들을 connector로 부터 추정할 수 있음
+        /// </summary>
+        public static Vector2[] GetVertices(this PowerPoint.Shape shape)
+        {
+            if (shape.Type == MsoShapeType.msoFreeform)
+            {
+                return shape.Nodes.GetCornerVertices();
+            }
+            else if (shape.Type == MsoShapeType.msoLine)
+            {
+                var connectors = shape.GetConnectors();
+                return connectors;
+            }
+            else if (shape.Type == MsoShapeType.msoAutoShape)
+            {
+            }
+            return null;
         }
     }
 }

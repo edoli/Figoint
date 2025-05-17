@@ -437,10 +437,9 @@ namespace EdoliAddIn
             var slide = Util.CurrentSlide();
 
             // 두 선이 선택된 경우 두 선 사이의 각도를 표시
-            if (shapes.Count == 2 && shapes.All(s => s.Type == Microsoft.Office.Core.MsoShapeType.msoLine))
+            if (shapes.Count == 2 && shapes.All(s => s.Type == MsoShapeType.msoLine))
             {
-                // 현재로서는 line의 point 위치들을 알아낼 방법이 없음
-                //DrawAngleBetweenLines(shapes[0], shapes[1], slide);
+                DrawAngleBetweenLines(shapes[0], shapes[1], slide);
             }
             // 단일 도형이 선택된 경우 각 꼭지점의 각도를 표시
             else if (shapes.Count == 1)
@@ -453,13 +452,70 @@ namespace EdoliAddIn
                 }
             }
         }
+
+        private static void DrawAngleBetweenLines(PowerPoint.Shape line1, PowerPoint.Shape line2, PowerPoint.Slide slide)
+        {
+            var vertices1 = line1.GetVertices();
+            var vertices2 = line2.GetVertices();
+
+            // 각 선의 벡터 계산
+            Vector2 line1Vector = vertices1[1] - vertices1[0];
+            Vector2 line2Vector = vertices2[1] - vertices2[0];
+
+            // 두 선의 교점 계산
+            Vector2 intersection = CalculateIntersection(
+                vertices1[0], line1Vector,
+                vertices2[0], line2Vector);
+
+            // 교점이 없는 경우(평행선) 종료
+            if (float.IsNaN(intersection.X) || float.IsNaN(intersection.Y))
+            {
+                return;
+            }
+
+            // 교점에서 두 벡터 사이의 각도 계산
+            Vector2 v1 = Vector2.Normalize(line1Vector);
+            Vector2 v2 = Vector2.Normalize(line2Vector);
+            double angle = CalculateAngleBetweenVectors(v1, v2);
+
+            // 180도 이상인 경우 보완각을 사용
+            if (angle > 180.0)
+            {
+                angle = 360.0 - angle;
+            }
+
+            // 교점에서 각도를 표시 (4위치에 모두 표시)
+            DrawAngleArc(intersection.X, intersection.Y, 16, v1, v2, angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 16, -v1, -v2, angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 16, -v1, v2, 180 - angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 16, v1, -v2, 180 - angle, slide);
+        }
+
+        // 두 선의 교점 계산 함수
+        private static Vector2 CalculateIntersection(Vector2 point1, Vector2 direction1, Vector2 point2, Vector2 direction2)
+        {
+            // 두 직선의 방정식을 이용하여 교점 계산
+            // 첫 번째 선: point1 + t * direction1
+            // 두 번째 선: point2 + s * direction2
+
+            // 두 방향 벡터가 평행한 경우
+            float cross = direction1.X * direction2.Y - direction1.Y * direction2.X;
+            if (Math.Abs(cross) < 1e-6)
+            {
+                return new Vector2(float.NaN, float.NaN); // 교점 없음 (평행)
+            }
+
+            // 교점의 매개변수 t 계산
+            Vector2 diff = point2 - point1;
+            float t = (diff.X * direction2.Y - diff.Y * direction2.X) / cross;
+
+            // 교점 좌표 계산
+            return point1 + t * direction1;
+        }
+
         private static void DrawAnglesForPolygon(PowerPoint.Shape polygon, PowerPoint.Slide slide)
         {
-            int nodeCount = polygon.Nodes.Count;
-            if (nodeCount < 3) return;
-
-            // 벡터 배열로 변환
-            Vector2[] vertices = polygon.Nodes.GetCornerVertices();
+            Vector2[] vertices = polygon.GetVertices();
             int vertexCount = vertices.Length;
 
             // 꼭지점이 3개 미만이면 함수 종료
