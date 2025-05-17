@@ -3,7 +3,6 @@ using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
@@ -485,10 +484,10 @@ namespace EdoliAddIn
             }
 
             // 교점에서 각도를 표시 (4위치에 모두 표시)
-            DrawAngleArc(intersection.X, intersection.Y, 16, v1, v2, angle, slide);
-            DrawAngleArc(intersection.X, intersection.Y, 16, -v1, -v2, angle, slide);
-            DrawAngleArc(intersection.X, intersection.Y, 16, -v1, v2, 180 - angle, slide);
-            DrawAngleArc(intersection.X, intersection.Y, 16, v1, -v2, 180 - angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 12, v1, v2, angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 12, -v1, -v2, angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 12, -v1, v2, 180 - angle, slide);
+            DrawAngleArc(intersection.X, intersection.Y, 12, v1, -v2, 180 - angle, slide);
         }
 
         // 두 선의 교점 계산 함수
@@ -559,7 +558,7 @@ namespace EdoliAddIn
                 }
 
                 // 각도 표시
-                DrawAngleArc(vertices[i].X, vertices[i].Y, 16, v1, v2, angle, slide);
+                DrawAngleArc(vertices[i].X, vertices[i].Y, 12, v1, v2, angle, slide);
             }
         }
         private static double CalculateAngleBetweenVectors(Vector2 v1, Vector2 v2)
@@ -658,98 +657,27 @@ namespace EdoliAddIn
             // 텍스트 추가
             string angleText = Math.Round(angle, 1).ToString() + "°";
 
-            float width = angleText.Length * 8;
-            float height = 20f;
+            var textShape = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, 0, 0, 0, 0);
 
-            float halfWidth = width / 2f;
-            float halfHeight = height / 2f;
-
-            // 두 벡터의 중간 방향을 계산
-            float textX = x + (float)Math.Cos(midAngleRadians) * (radius * 1.2f + halfWidth) - halfWidth;
-            float textY = y + (float)Math.Sin(midAngleRadians) * (radius * 1.2f + halfHeight) - halfHeight;
-
-            var textShape = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, textX, textY, width, height);
-
-            textShape.TextFrame.TextRange.Text = angleText;
-            textShape.TextFrame.TextRange.Font.Size = 12;
-            textShape.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
-            textShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
             textShape.TextFrame2.MarginLeft = 0;
             textShape.TextFrame2.MarginRight = 0;
             textShape.TextFrame2.MarginTop = 0;
             textShape.TextFrame2.MarginBottom = 0;
 
-            // 텍스트 배경 투명하게
-            textShape.Fill.Transparency = 1;
-            textShape.Line.Transparency = 1;
-        }
+            textShape.TextFrame.WordWrap = MsoTriState.msoFalse;
+            textShape.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
+            textShape.TextFrame.TextRange.Font.Size = 8;
+            textShape.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
+            textShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
 
-        public static void DrawPerpendicularAngleLines()
-        {
-            Globals.ThisAddIn.Application.StartNewUndoEntry();
-            var shapes = Util.ListSelectedShapes();
+            textShape.TextFrame.TextRange.Text = angleText;
 
-            if (shapes.Count == 1 && shapes[0].Type == Microsoft.Office.Core.MsoShapeType.msoLine)
-            {
-                var line = shapes[0];
-                var slide = Util.CurrentSlide();
+            // 두 벡터의 중간 방향을 계산
+            float textX = x + (float)Math.Cos(midAngleRadians) * (radius * 1.5f);
+            float textY = y + (float)Math.Sin(midAngleRadians) * (radius * 1.5f);
 
-                // 선의 중앙점 계산
-                float midX = line.Left + line.Width / 2;
-                float midY = line.Top + line.Height / 2;
-
-                // 선의 벡터 계산
-                Vector2 lineVector = new Vector2(line.Width, line.Height);
-                float lineLength = lineVector.Length();
-
-                // 선이 너무 작은 경우 처리 방지
-                if (lineLength < 1) return;
-
-                // 수직 벡터 계산
-                Vector2 perpVector = new Vector2(-lineVector.Y, lineVector.X);
-                perpVector = Vector2.Normalize(perpVector) * (lineLength / 2); // 원래 선 길이의 절반
-
-                // 수직선 그리기
-                var perpLine = slide.Shapes.AddLine(
-                    midX,
-                    midY,
-                    midX + perpVector.X,
-                    midY + perpVector.Y);
-
-                // 수직선 스타일 설정
-                perpLine.Line.ForeColor.RGB = line.Line.ForeColor.RGB;
-                perpLine.Line.Weight = line.Line.Weight;
-                perpLine.Line.DashStyle = MsoLineDashStyle.msoLineDashDot;
-
-                // 직각 표시 추가
-                float squareSize = 10;
-                var rightAngleMark = slide.Shapes.AddShape(
-                    Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle,
-                    midX - squareSize / 2,
-                    midY - squareSize / 2,
-                    squareSize,
-                    squareSize);
-
-                rightAngleMark.Line.ForeColor.RGB = 0; // 검은색
-                rightAngleMark.Fill.Transparency = 1; // 투명하게
-
-                // 90도 텍스트 추가
-                var textShape = slide.Shapes.AddTextbox(
-                    Microsoft.Office.Core.MsoTextOrientation.msoTextOrientationHorizontal,
-                    midX + perpVector.X / 2 - 15,
-                    midY + perpVector.Y / 2 - 10,
-                    30,
-                    20);
-
-                textShape.TextFrame.TextRange.Text = "90°";
-                textShape.TextFrame.TextRange.Font.Size = 12;
-                textShape.TextFrame.TextRange.Font.Bold = Microsoft.Office.Core.MsoTriState.msoTrue;
-                textShape.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
-
-                // 텍스트 배경 투명하게
-                textShape.Fill.Transparency = 1;
-                textShape.Line.Transparency = 1;
-            }
+            textShape.Left = textX - textShape.Width / 2;
+            textShape.Top = textY - textShape.Height / 2;
         }
 
         public static void DistanceBetweenPoints()
@@ -760,7 +688,7 @@ namespace EdoliAddIn
 
             foreach (var shape in shapes)
             {
-                Vector2[] vertices = shape.Nodes.GetCornerVertices();
+                Vector2[] vertices = shape.GetVertices();
                 int vertexCount = vertices.Length;
 
                 if (vertexCount < 2)
@@ -802,10 +730,6 @@ namespace EdoliAddIn
                     Vector2 perpVector = new Vector2(lineVector.Y, -lineVector.X);
                     perpVector = Vector2.Normalize(perpVector) * 8f; // 8 픽셀 offset
 
-                    // 거리 텍스트 추가
-                    float textWidth = distanceText.Length * 8; // 텍스트 길이에 따른 적절한 너비
-                    float textHeight = 20f;
-
                     // 텍스트 상자 위치 설정 (선 위에 위치하도록 수직 벡터 사용)
                     Vector2 textPosition = midPoint + perpVector;
 
@@ -814,25 +738,26 @@ namespace EdoliAddIn
                         MsoTextOrientation.msoTextOrientationHorizontal,
                         textPosition.X, // 중앙 정렬
                         textPosition.Y,
-                        textWidth,
-                        textHeight);
+                        0,
+                        0);
 
                     // 텍스트 설정
-                    textBox.TextFrame.TextRange.Text = distanceText;
-                    textBox.TextFrame.TextRange.Font.Size = 12;
-                    textBox.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
-                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
-
-                    // 텍스트 마진 설정
-                    textBox.TextFrame2.MarginLeft = 0;
-                    textBox.TextFrame2.MarginRight = 0;
+                    textBox.TextFrame2.MarginLeft = 2;
+                    textBox.TextFrame2.MarginRight = 2;
                     textBox.TextFrame2.MarginTop = 0;
                     textBox.TextFrame2.MarginBottom = 0;
 
-                    textBox.Left -= textBox.Width / 2;
+                    textBox.TextFrame.TextRange.Font.Size = 8;
+                    textBox.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
+                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+                    textBox.TextFrame.WordWrap = MsoTriState.msoFalse;
+                    textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
+
+                    textBox.TextFrame.TextRange.Text = distanceText;
+
                     textBox.Top -= textBox.Height / 2;
 
-                    // 텍스트 회전 (라인과 같은 각도로)
+                    //// 텍스트 회전 (라인과 같은 각도로)
                     textBox.Rotation = lineAngleDegrees;
 
                     // 양방향 화살표 선 그리기

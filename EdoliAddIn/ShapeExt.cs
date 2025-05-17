@@ -509,7 +509,7 @@ namespace EdoliAddIn
             else if (shape.Type == MsoShapeType.msoAutoShape)
             {
             }
-            return null;
+            return new Vector2[0];
         }
     }
 }
