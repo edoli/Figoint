@@ -478,9 +478,31 @@ namespace EdoliAddIn
 
             var line = slide.Shapes.AddLine(-1000, -1000, 10, 10);
 
-            for (int i = 0; i < shape.ConnectionSiteCount; i++)
+            for (int i = 1; i <= shape.ConnectionSiteCount; i++)
             {
                 line.ConnectorFormat.EndConnect(shape, i + 1);
+                float x = line.Left + line.Width;
+                float y = line.Top + line.Height;
+
+                connectors.Add(new Vector2(x, y));
+            }
+
+            line.Delete();
+
+            return connectors.ToArray();
+        }
+
+        public static Vector2[] GetConnectors(this PowerPoint.Shape shape, int[] indices = null)
+        {
+            PowerPoint.Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+
+            var connectors = new List<Vector2>();
+
+            var line = slide.Shapes.AddLine(-1000, -1000, 10, 10);
+
+            foreach (int i in indices)
+            {
+                line.ConnectorFormat.EndConnect(shape, i);
                 float x = line.Left + line.Width;
                 float y = line.Top + line.Height;
 
@@ -503,11 +525,25 @@ namespace EdoliAddIn
             }
             else if (shape.Type == MsoShapeType.msoLine)
             {
-                var connectors = shape.GetConnectors();
-                return connectors;
+                return shape.GetConnectors();
             }
             else if (shape.Type == MsoShapeType.msoAutoShape)
             {
+                if (shape.AutoShapeType == MsoAutoShapeType.msoShapeRectangle)
+                {
+                    return new Vector2[]
+                    {
+                        shape.PositionRot(Anchor.TopLeft),
+                        shape.PositionRot(Anchor.TopRight),
+                        shape.PositionRot(Anchor.BottomRight),
+                        shape.PositionRot(Anchor.BottomLeft),
+                        shape.PositionRot(Anchor.TopLeft)
+                    };
+                }
+                else if (shape.AutoShapeType == MsoAutoShapeType.msoShapeIsoscelesTriangle || shape.AutoShapeType == MsoAutoShapeType.msoShapeRightTriangle)
+                {
+                    return shape.GetConnectors(new int[] { 1, 5, 3, 1 });
+                }
             }
             return new Vector2[0];
         }
