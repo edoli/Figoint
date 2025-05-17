@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace EdoliAddIn
@@ -217,6 +218,10 @@ namespace EdoliAddIn
             }
         }
 
+        /// <summary>
+        /// Get the position of the shape based on the specified anchor point.
+        /// based on real visual bound of shapes.
+        /// </summary>
         public static Vector2 Position(this PowerPoint.Shape shape, Anchor anchor)
         {
             switch (anchor)
@@ -242,6 +247,48 @@ namespace EdoliAddIn
                 default:
                     throw new ArgumentException("Invalid anchor point", nameof(anchor));
             }
+        }
+
+        /// <summary>
+        /// Get the position of the shape based on the specified anchor point.
+        /// based on original bound of shapes.
+        /// </summary>
+        public static Vector2 PositionRot(this PowerPoint.Shape shape, Anchor anchor)
+        {
+            Vector2 center = new Vector2(shape.Left + shape.Width / 2, shape.Top + shape.Height / 2);
+            Vector2 vector;
+            switch (anchor)
+            {
+                case Anchor.Left:
+                    vector = new Vector2(shape.Left, shape.Top + shape.Height / 2);
+                    break;
+                case Anchor.Right:
+                    vector = new Vector2(shape.Left + shape.Width, shape.Top + shape.Height / 2);
+                    break;
+                case Anchor.Top:
+                    vector = new Vector2(shape.Left + shape.Width / 2, shape.Top);
+                    break;
+                case Anchor.Bottom:
+                    vector = new Vector2(shape.Left + shape.Width / 2, shape.Top + shape.Height);
+                    break;
+                case Anchor.TopLeft:
+                    vector = new Vector2(shape.Left, shape.Top);
+                    break;
+                case Anchor.TopRight:
+                    vector = new Vector2(shape.Left + shape.Width, shape.Top);
+                    break;
+                case Anchor.BottomLeft:
+                    vector = new Vector2(shape.Left, shape.Top + shape.Height);
+                    break;
+                case Anchor.BottomRight:
+                    vector = new Vector2(shape.Left + shape.Width, shape.Top + shape.Height);
+                    break;
+                case Anchor.Center:
+                    return center;
+                default:
+                    throw new ArgumentException("Invalid anchor point", nameof(anchor));
+            }
+            return center + (vector - center).RotateDeg(shape.Rotation);
         }
 
         public static void SetPosition(this PowerPoint.Shape shape, Vector2 position, Anchor anchor)
@@ -385,6 +432,39 @@ namespace EdoliAddIn
                 return Anchor.Bottom;
             }
             return Anchor.None;
+        }
+
+        /// <summary>
+        /// Nodes에서 control 포인트들은 제외하고 실제 꼭지점들만 추출
+        /// </summary>
+        public static Vector2[] GetCornerVertices(this PowerPoint.ShapeNodes nodes)
+        {
+            int nodeCount = nodes.Count;
+
+            // 실제 꼭지점 노드만 추출
+            List<Vector2> vertexList = new List<Vector2>();
+            for (int i = 1; i <= nodeCount; i++)
+            {
+                var node = nodes[i];
+                var segmentType = node.SegmentType;
+                var editingType = node.EditingType;
+
+                if (i > 1 && segmentType == MsoSegmentType.msoSegmentCurve)
+                {
+                    // 첫 노드는 무조건 꼭지점
+                    // 그 이후로 Curve가 발견되면 2개 뒤의 노드가 꼭지점 (2개는 컨트롤 포인트)
+                    var points = nodes[i + 2].Points;
+                    vertexList.Add(new Vector2((float)points[1, 1], (float)points[1, 2]));
+                    i += 2;
+                }
+                else
+                {
+                    var points = node.Points;
+                    vertexList.Add(new Vector2((float)points[1, 1], (float)points[1, 2]));
+                }
+            }
+
+            return vertexList.ToArray();
         }
 
         public static Vector2[] GetLineVertices(this PowerPoint.Shape shape)

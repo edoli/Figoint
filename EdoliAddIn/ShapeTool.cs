@@ -458,35 +458,12 @@ namespace EdoliAddIn
             int nodeCount = polygon.Nodes.Count;
             if (nodeCount < 3) return;
 
-            // 실제 꼭지점 노드만 추출
-            List<Vector2> vertexList = new List<Vector2>();
-            for (int i = 1; i <= nodeCount; i++)
-            {
-                var node = polygon.Nodes[i];
-                var segmentType = node.SegmentType;
-                var editingType = node.EditingType;
-
-                if (i > 1 && segmentType == MsoSegmentType.msoSegmentCurve)
-                {
-                    // 첫 노드는 무조건 꼭지점
-                    // 그 이후로 Curve가 발견되면 2개 뒤의 노드가 꼭지점 (2개는 컨트롤 포인트)
-                    var points = polygon.Nodes[i + 2].Points;
-                    vertexList.Add(new Vector2((float)points[1, 1], (float)points[1, 2]));
-                    i += 2;
-                }
-                else
-                {
-                    var points = node.Points;
-                    vertexList.Add(new Vector2((float)points[1, 1], (float)points[1, 2]));
-                }
-            }
+            // 벡터 배열로 변환
+            Vector2[] vertices = polygon.Nodes.GetCornerVertices();
+            int vertexCount = vertices.Length;
 
             // 꼭지점이 3개 미만이면 함수 종료
-            if (vertexList.Count < 3) return;
-
-            // 벡터 배열로 변환
-            Vector2[] vertices = vertexList.ToArray();
-            int vertexCount = vertices.Length;
+            if (vertexCount < 3) return;
 
             // 처음 꼭지점과 마지막 꼭지점이 동일할 경우 제거
             var isClosed = false;
@@ -716,6 +693,105 @@ namespace EdoliAddIn
                 // 텍스트 배경 투명하게
                 textShape.Fill.Transparency = 1;
                 textShape.Line.Transparency = 1;
+            }
+        }
+
+        public static void DistanceBetweenPoints()
+        {
+            Globals.ThisAddIn.Application.StartNewUndoEntry();
+            var shapes = Util.ListSelectedShapes();
+            var slide = Util.CurrentSlide();
+
+            foreach (var shape in shapes)
+            {
+                Vector2[] vertices = shape.Nodes.GetCornerVertices();
+                int vertexCount = vertices.Length;
+
+                if (vertexCount < 2)
+                {
+                    continue;
+                }
+
+                // vertices 사이의 거리를 표시
+
+                for (int i = 0; i < vertexCount - 1; i++)
+                {
+                    int nextIndex = i + 1;
+
+                    Vector2 start = vertices[i];
+                    Vector2 end = vertices[nextIndex];
+
+                    // 두 점 사이의 거리 계산 (PowerPoint에서의 픽셀 단위)
+                    float pixelDistance = Vector2.Distance(start, end);
+
+                    // 실제 단위로 변환 (pixels / shapeScale = cm)
+                    float actualDistance = pixelDistance / shapeScale;
+
+                    // 거리 표시 (mm 단위로 표시, 소수점 2자리까지)
+                    string distanceText = Math.Round(actualDistance * 10, 2).ToString() + " mm";
+
+                    // 두 점 사이의 중간 지점 계산
+                    Vector2 midPoint = (start + end) / 2;
+
+                    // 두 점을 연결하는 벡터 계산
+                    Vector2 lineVector = end - start;
+
+                    // 선의 각도 계산 (라디안)
+                    float lineAngle = (float)Math.Atan2(lineVector.Y, lineVector.X);
+
+                    // 각도를 도(degrees)로 변환
+                    float lineAngleDegrees = lineAngle * (180f / (float)Math.PI);
+
+                    // 텍스트가 선과 겹치지 않도록 수직 벡터 계산 (선 위에 위치하도록)
+                    Vector2 perpVector = new Vector2(lineVector.Y, -lineVector.X);
+                    perpVector = Vector2.Normalize(perpVector) * 8f; // 8 픽셀 offset
+
+                    // 거리 텍스트 추가
+                    float textWidth = distanceText.Length * 8; // 텍스트 길이에 따른 적절한 너비
+                    float textHeight = 20f;
+
+                    // 텍스트 상자 위치 설정 (선 위에 위치하도록 수직 벡터 사용)
+                    Vector2 textPosition = midPoint + perpVector;
+
+                    // 텍스트 상자 추가
+                    var textBox = slide.Shapes.AddTextbox(
+                        MsoTextOrientation.msoTextOrientationHorizontal,
+                        textPosition.X, // 중앙 정렬
+                        textPosition.Y,
+                        textWidth,
+                        textHeight);
+
+                    // 텍스트 설정
+                    textBox.TextFrame.TextRange.Text = distanceText;
+                    textBox.TextFrame.TextRange.Font.Size = 12;
+                    textBox.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
+                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PowerPoint.PpParagraphAlignment.ppAlignCenter;
+
+                    // 텍스트 마진 설정
+                    textBox.TextFrame2.MarginLeft = 0;
+                    textBox.TextFrame2.MarginRight = 0;
+                    textBox.TextFrame2.MarginTop = 0;
+                    textBox.TextFrame2.MarginBottom = 0;
+
+                    textBox.Left -= textBox.Width / 2;
+                    textBox.Top -= textBox.Height / 2;
+
+                    // 텍스트 회전 (라인과 같은 각도로)
+                    textBox.Rotation = lineAngleDegrees;
+
+                    // 양방향 화살표 선 그리기
+                    var startOffsetPos = start + perpVector;
+                    var endOffsetPos = end + perpVector;
+
+                    var distanceLineA = slide.Shapes.AddLine(startOffsetPos.X, startOffsetPos.Y, 0, 0);
+                    var distanceLineB = slide.Shapes.AddLine(endOffsetPos.X, endOffsetPos.Y, 0, 0);
+                    distanceLineA.ConnectorFormat.EndConnect(textBox, 2);
+                    distanceLineB.ConnectorFormat.EndConnect(textBox, 4);
+
+                    // 양방향 화살표 설정
+                    distanceLineA.Line.BeginArrowheadStyle = MsoArrowheadStyle.msoArrowheadTriangle;
+                    distanceLineB.Line.BeginArrowheadStyle = MsoArrowheadStyle.msoArrowheadTriangle;
+                }
             }
         }
 

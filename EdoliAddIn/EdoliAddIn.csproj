@@ -409,6 +409,7 @@
     <Content Include="Resources\icon_begin_arrow_size_up.png" />
     <Content Include="Resources\icon_begin_arrow_toggle.png" />
     <Content Include="Resources\icon_draw_angle.png" />
+    <Content Include="Resources\icon_draw_dimension.png" />
     <Content Include="Resources\icon_end_arrow_size_down.png" />
     <Content Include="Resources\icon_end_arrow_size_up.png" />
     <Content Include="Resources\icon_end_arrow_toggle.png" />

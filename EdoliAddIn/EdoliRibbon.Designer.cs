@@ -45,6 +45,7 @@
             this.connectShapeByLine = this.Factory.CreateRibbonButton();
             this.trimImage = this.Factory.CreateRibbonButton();
             this.drawAngle = this.Factory.CreateRibbonButton();
+            this.drawDimension = this.Factory.CreateRibbonButton();
             this.SVGTool = this.Factory.CreateRibbonButton();
             this.alignGroup = this.Factory.CreateRibbonGroup();
             this.labelBottom = this.Factory.CreateRibbonButton();
@@ -109,6 +110,7 @@
             this.shape.Items.Add(this.connectShapeByLine);
             this.shape.Items.Add(this.trimImage);
             this.shape.Items.Add(this.drawAngle);
+            this.shape.Items.Add(this.drawDimension);
             this.shape.Items.Add(this.SVGTool);
             this.shape.Label = "Shape";
             this.shape.Name = "shape";
@@ -209,6 +211,17 @@
             this.drawAngle.ShowLabel = false;
             this.drawAngle.SuperTip = "Draw angle";
             this.drawAngle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawAngle_Click);
+            // 
+            // drawDimension
+            // 
+            this.drawDimension.Image = global::EdoliAddIn.Properties.Resources.icon_draw_dimension;
+            this.drawDimension.Label = "Draw dimension";
+            this.drawDimension.Name = "drawDimension";
+            this.drawDimension.ScreenTip = "Draw dimension";
+            this.drawDimension.ShowImage = true;
+            this.drawDimension.ShowLabel = false;
+            this.drawDimension.SuperTip = "Draw dimension";
+            this.drawDimension.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawDimension_Click);
             // 
             // SVGTool
             // 
@@ -618,6 +631,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton trimLines;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton SVGTool;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton drawAngle;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton drawDimension;
     }
 
     partial class ThisRibbonCollection
