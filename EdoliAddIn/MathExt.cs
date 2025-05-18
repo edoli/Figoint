@@ -57,9 +57,9 @@ namespace EdoliAddIn
 
         public static Intersection CalculateIntersection(Vector2 point1, Vector2 direction1, Vector2 point2, Vector2 direction2)
         {
-            // µÎ Á÷¼±ÀÇ ¹æÁ¤½ÄÀ» ÀÌ¿ëÇÏ¿© ±³Á¡ °è»ê
-            // Ã¹ ¹øÂ° ¼±: point1 + t1 * direction1
-            // µÎ ¹øÂ° ¼±: point2 + t2 * direction2
+            // ë‘ ì§ì„ ì˜ ë°©ì •ì‹ì„ ì´ìš©í•˜ì—¬ êµì  ê³„ì‚°
+            // ì²« ë²ˆì§¸ ì„ : point1 + t1 * direction1
+            // ë‘ ë²ˆì§¸ ì„ : point2 + t2 * direction2
 
             Intersection result = new Intersection();
 
@@ -92,7 +92,7 @@ namespace EdoliAddIn
             if (v2.Length() > 0) v2 = Vector2.Normalize(v2);
 
             double dotProduct = Vector2.Dot(v1, v2);
-            dotProduct = Math.Min(Math.Max(dotProduct, -1.0), 1.0); // ºÎµ¿¼Ò¼öÁ¡ ¿À·ù ¹æÁö
+            dotProduct = Math.Min(Math.Max(dotProduct, -1.0), 1.0); // ë¶€ë™ì†Œìˆ˜ì  ì˜¤ë¥˜ ë°©ì§€
             double angleRadians = Math.Acos(dotProduct);
 
             double angleDegrees = angleRadians * (180.0 / Math.PI);

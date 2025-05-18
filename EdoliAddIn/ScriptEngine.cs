@@ -1,4 +1,4 @@
-﻿namespace EdoliAddIn
+namespace EdoliAddIn
 {
     internal class ScriptEngine
     {

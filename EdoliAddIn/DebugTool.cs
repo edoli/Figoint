@@ -168,15 +168,12 @@ namespace EdoliAddIn
             textBox.TextFrame.WordWrap = MsoTriState.msoFalse;
             textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
 
-
-            // �ؽ�Ʈ�� ������ �ܰ��� �߰�
             textBox.TextFrame2.TextRange.Font.Line.Visible = MsoTriState.msoTrue;
             textBox.TextFrame2.TextRange.Font.Line.ForeColor.RGB = (int)ColorTranslator.ToOle(Color.Black);
             textBox.TextFrame2.TextRange.Font.Line.Weight = 0.25f;
 
             textBox.TextFrame.TextRange.Text = text;
 
-            // text�� ���Ͱ� x, y�� ������ ��ġ ����
             textBox.Top -= textBox.Height / 2;
 
             return textBox;

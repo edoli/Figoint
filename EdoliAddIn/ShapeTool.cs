@@ -1,4 +1,4 @@
-﻿using Expressive;
+using Expressive;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
