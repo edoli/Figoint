@@ -129,11 +129,11 @@ namespace EdoliAddIn
         }
         private void drawAngle_Click(object sender, RibbonControlEventArgs e)
         {
-            ShapeTool.DrawAngle();
+            DimensionTool.DrawAngle();
         }
         private void drawDimension_Click(object sender, RibbonControlEventArgs e)
         {
-            ShapeTool.DistanceBetweenPoints();
+            DimensionTool.DistanceBetweenPoints();
         }
 
         private void curveOfEquation_Click(object sender, RibbonControlEventArgs e)

@@ -192,6 +192,7 @@
     <Compile Include="AlignTool.cs" />
     <Compile Include="AnimationTool.cs" />
     <Compile Include="DebugUtil.cs" />
+    <Compile Include="DimensionTool.cs" />
     <Compile Include="EdoliRibbon.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -379,8 +380,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="EdoliAddin_Temporary.pfx" />
-    <None Include="EdoliAddIn_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
