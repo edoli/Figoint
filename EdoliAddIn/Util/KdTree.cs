@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace EdoliAddIn
 
         private Node BuildTree(List<Leaf<T>> leaves, int depth)
         {
-            if (!leaves.Any())
+            if (leaves == null || leaves.Count == 0)
             {
                 return null;
             }
@@ -28,8 +27,10 @@ namespace EdoliAddIn
             Leaf<T> leaf = leaves[medianIndex];
             Node node = new Node(leaf)
             {
-                Left = BuildTree(leaves.Take(medianIndex).ToList(), depth + 1),
-                Right = BuildTree(leaves.Skip(medianIndex + 1).ToList(), depth + 1)
+                Left = BuildTree(leaves.GetRange(0, medianIndex), depth + 1),
+                Right = BuildTree(leaves.Count > medianIndex + 1 ?
+                    leaves.GetRange(medianIndex + 1, leaves.Count - medianIndex - 1) :
+                    new List<Leaf<T>>(), depth + 1)
             };
 
             return node;
@@ -37,8 +38,8 @@ namespace EdoliAddIn
 
         public override Leaf<T> FindNearest(float x, float y)
         {
-            float bestDistance = float.MaxValue;
-            var bestNode = FindNearestNeighbor(root, x, y, 0, null, ref bestDistance);
+            float bestDistanceSq = float.MaxValue;
+            var bestNode = FindNearestNeighbor(root, x, y, 0, null, ref bestDistanceSq);
             if (bestNode == null)
             {
                 return null;
@@ -46,47 +47,49 @@ namespace EdoliAddIn
             return new Leaf<T>(bestNode.Data, bestNode.X, bestNode.Y);
         }
 
-        private Node FindNearestNeighbor(Node node, float x, float y, int depth, Node best, ref float bestDistance)
+        private Node FindNearestNeighbor(Node node, float x, float y, int depth, Node best, ref float bestDistanceSq)
         {
             if (node == null)
             {
                 return best;
             }
 
-            float distance = Distance(node, x, y);
-            if (distance < bestDistance)
+            float distanceSq = DistanceSquared(node, x, y);
+            if (distanceSq < bestDistanceSq)
             {
                 best = node;
-                bestDistance = distance;
+                bestDistanceSq = distanceSq;
             }
 
             int axis = depth % 2;
-            Node nextBranch;
-            Node oppositeBranch;
+            float axisValue = axis == 0 ? x : y;
+            float nodeAxisValue = axis == 0 ? node.X : node.Y;
 
-            if ((axis == 0 && x < node.X) || (axis == 1 && y < node.Y))
+            Node firstBranch, secondBranch;
+            if (axisValue < nodeAxisValue)
             {
-                nextBranch = node.Left;
-                oppositeBranch = node.Right;
+                firstBranch = node.Left;
+                secondBranch = node.Right;
             }
             else
             {
-                nextBranch = node.Right;
-                oppositeBranch = node.Left;
+                firstBranch = node.Right;
+                secondBranch = node.Left;
             }
 
-            best = FindNearestNeighbor(nextBranch, x, y, depth + 1, best, ref bestDistance);
+            best = FindNearestNeighbor(firstBranch, x, y, depth + 1, best, ref bestDistanceSq);
 
-            float axisDistance = axis == 0 ? node.Y - y : node.X - x;
-            if (axisDistance * axisDistance < bestDistance)
+            // 초평면(hyperplane)과의 거리를 계산하여 다른 브랜치 탐색 여부 결정
+            float axisDistanceSq = (nodeAxisValue - axisValue) * (nodeAxisValue - axisValue);
+            if (axisDistanceSq < bestDistanceSq)
             {
-                best = FindNearestNeighbor(oppositeBranch, x, y, depth + 1, best, ref bestDistance);
+                best = FindNearestNeighbor(secondBranch, x, y, depth + 1, best, ref bestDistanceSq);
             }
 
             return best;
         }
 
-        private float Distance(Node a, float x, float y)
+        private float DistanceSquared(Node a, float x, float y)
         {
             float dx = a.X - x;
             float dy = a.Y - y;
