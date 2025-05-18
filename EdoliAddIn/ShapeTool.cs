@@ -370,46 +370,22 @@ namespace EdoliAddIn
 
             line.Delete();
 
-            // TODO: KdTree 사용 시 문제 발생
-            // var searchTree = new KdTree<ConnectorInfo>(connectors);
-            var searchTree = new QuadTree<ConnectorInfo>();
-            foreach (var connector in connectors)
-            {
-                searchTree.Insert(connector);
-            }
+             var searchTree = new KdTree<ConnectorInfo>(connectors);
 
-            // HACK: 선의 정확한 노드 포인트를 가져올 수 없음
             foreach (var shape in connectorShapes)
             {
-                var p1 = new Vector2(shape.Left, shape.Top);
-                var p2 = new Vector2(shape.Left, shape.Top + shape.Height);
-                var p3 = new Vector2(shape.Left + shape.Width, shape.Top);
-                var p4 = new Vector2(shape.Left + shape.Width, shape.Top + shape.Height);
+                var points = shape.GetConnectors();
 
-                var points = new List<Vector2>();
-
-                points.Add(p1);
-                if (!IsCloseEnough(p1, p2))
+                var nearests = points.Select(p => searchTree.FindNearest(p.X, p.Y)).ToArray();
+                var n0 = nearests[0];
+                var n1 = nearests[1];
+                if (IsCloseEnough(points[0], n0.X, n0.Y))
                 {
-                    points.Add(p2);
+                    shape.ConnectorFormat.BeginConnect(n0.Data.Shape, n0.Data.ConnectorSite);
                 }
-                if (!IsCloseEnough(p1, p3))
+                if (IsCloseEnough(points[1], n1.X, n1.Y))
                 {
-                    points.Add(p3);
-                }
-                if (!IsCloseEnough(p2, p4) && !IsCloseEnough(p3, p4))
-                {
-                    points.Add(p4);
-                }
-                var nearests = points.Select(p => searchTree.FindNearest(p.X, p.Y))
-                    .Where((n, i) => n != null && IsCloseEnough(points[i], n.X, n.Y)).ToArray();
-
-                if (nearests.Count() == 2)
-                {
-                    var n1 = nearests[0].Data;
-                    var n2 = nearests[1].Data;
-                    shape.ConnectorFormat.BeginConnect(n1.Shape, n1.ConnectorSite);
-                    shape.ConnectorFormat.EndConnect(n2.Shape, n2.ConnectorSite);
+                    shape.ConnectorFormat.EndConnect(n1.Data.Shape, n1.Data.ConnectorSite);
                 }
             }
         }
