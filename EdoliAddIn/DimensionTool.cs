@@ -12,6 +12,28 @@ namespace EdoliAddIn
     {
 
         private static float shapeScale = 28.3465f;
+
+        private static PowerPoint.Shape AddDimensionTextShape(PowerPoint.Slide slide, float x, float y, String text)
+        {
+            // Add textbox
+            var textBox = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, x, y, 0, 0);
+
+            textBox.TextFrame2.MarginLeft = 2;
+            textBox.TextFrame2.MarginRight = 2;
+            textBox.TextFrame2.MarginTop = 0;
+            textBox.TextFrame2.MarginBottom = 0;
+
+            textBox.TextFrame.TextRange.Font.Size = 8;
+            textBox.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
+            textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+            textBox.TextFrame.WordWrap = MsoTriState.msoFalse;
+            textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
+
+            textBox.TextFrame.TextRange.Text = text;
+
+            return textBox;
+        }
+
         public static void DrawAngle()
         {
             Globals.ThisAddIn.Application.StartNewUndoEntry();
@@ -43,19 +65,21 @@ namespace EdoliAddIn
             Vector2 line1Vector = vertices1[1] - vertices1[0];
             Vector2 line2Vector = vertices2[1] - vertices2[0];
 
-            Vector2 intersection = CalculateIntersection(
+            var intersection = MathExt.CalculateIntersection(
                 vertices1[0], line1Vector,
                 vertices2[0], line2Vector);
 
+            var intersectionPoint = intersection.Point;
+
             // If the lines are parallel, intersection will be NaN
-            if (float.IsNaN(intersection.X) || float.IsNaN(intersection.Y))
+            if (float.IsNaN(intersectionPoint.X) || float.IsNaN(intersectionPoint.Y))
             {
                 return;
             }
 
             Vector2 v1 = Vector2.Normalize(line1Vector);
             Vector2 v2 = Vector2.Normalize(line2Vector);
-            double angle = CalculateAngleBetweenVectors(v1, v2);
+            double angle = MathExt.CalculateAngleBetween(v1, v2);
 
             if (angle > 180.0)
             {
@@ -63,29 +87,10 @@ namespace EdoliAddIn
             }
 
             // 교점에서 각도를 표시 (4위치에 모두 표시)
-            DrawAngleArc(intersection.X, intersection.Y, 12, v1, v2, angle, slide);
-            DrawAngleArc(intersection.X, intersection.Y, 12, -v1, -v2, angle, slide);
-            DrawAngleArc(intersection.X, intersection.Y, 12, -v1, v2, 180 - angle, slide);
-            DrawAngleArc(intersection.X, intersection.Y, 12, v1, -v2, 180 - angle, slide);
-        }
-
-        private static Vector2 CalculateIntersection(Vector2 point1, Vector2 direction1, Vector2 point2, Vector2 direction2)
-        {
-            // 두 직선의 방정식을 이용하여 교점 계산
-            // 첫 번째 선: point1 + t * direction1
-            // 두 번째 선: point2 + s * direction2
-
-            // Check if the lines are parallel
-            float cross = direction1.X * direction2.Y - direction1.Y * direction2.X;
-            if (Math.Abs(cross) < 1e-6)
-            {
-                return new Vector2(float.NaN, float.NaN); // No intersection (parallel lines)
-            }
-
-            Vector2 diff = point2 - point1;
-            float t = (diff.X * direction2.Y - diff.Y * direction2.X) / cross;
-
-            return point1 + t * direction1;
+            DrawAngleArc(intersectionPoint.X, intersectionPoint.Y, 12, v1, v2, angle, slide);
+            DrawAngleArc(intersectionPoint.X, intersectionPoint.Y, 12, -v1, -v2, angle, slide);
+            DrawAngleArc(intersectionPoint.X, intersectionPoint.Y, 12, -v1, v2, 180 - angle, slide);
+            DrawAngleArc(intersectionPoint.X, intersectionPoint.Y, 12, v1, -v2, 180 - angle, slide);
         }
 
         private static void DrawAnglesForPolygon(PowerPoint.Shape polygon, PowerPoint.Slide slide)
@@ -125,7 +130,7 @@ namespace EdoliAddIn
                 Vector2 v1 = vertices[prev] - vertices[i];
                 Vector2 v2 = vertices[next] - vertices[i];
 
-                double angle = CalculateAngleBetweenVectors(v1, v2);
+                double angle = MathExt.CalculateAngleBetween(v1, v2);
 
                 if (angle > 180.0)
                 {
@@ -134,19 +139,6 @@ namespace EdoliAddIn
 
                 DrawAngleArc(vertices[i].X, vertices[i].Y, 12, v1, v2, angle, slide);
             }
-        }
-        private static double CalculateAngleBetweenVectors(Vector2 v1, Vector2 v2)
-        {
-            if (v1.Length() > 0) v1 = Vector2.Normalize(v1);
-            if (v2.Length() > 0) v2 = Vector2.Normalize(v2);
-
-            double dotProduct = Vector2.Dot(v1, v2);
-            dotProduct = Math.Min(Math.Max(dotProduct, -1.0), 1.0); // 부동소수점 오류 방지
-            double angleRadians = Math.Acos(dotProduct);
-
-            double angleDegrees = angleRadians * (180.0 / Math.PI);
-
-            return angleDegrees;
         }
 
         private static void DrawAngleArc(float x, float y, float radius, Vector2 v1, Vector2 v2, double angle, PowerPoint.Slide slide)
@@ -220,27 +212,10 @@ namespace EdoliAddIn
             // Add text box
             string angleText = Math.Round(angle, 1).ToString() + "°";
 
-            var textShape = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, 0, 0, 0, 0);
-
-            textShape.TextFrame2.MarginLeft = 0;
-            textShape.TextFrame2.MarginRight = 0;
-            textShape.TextFrame2.MarginTop = 0;
-            textShape.TextFrame2.MarginBottom = 0;
-
-            textShape.TextFrame.WordWrap = MsoTriState.msoFalse;
-            textShape.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
-            textShape.TextFrame.TextRange.Font.Size = 8;
-            textShape.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
-            textShape.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
-
-            textShape.TextFrame.TextRange.Text = angleText;
-
             // Move text to the middle of the arc
             float textX = x + (float)Math.Cos(midAngleRadians) * (radius * 1.5f);
             float textY = y + (float)Math.Sin(midAngleRadians) * (radius * 1.5f);
-
-            textShape.Left = textX - textShape.Width / 2;
-            textShape.Top = textY - textShape.Height / 2;
+            var textShape = AddDimensionTextShape(slide, textX, textY, angleText);
         }
 
         public static void DistanceBetweenPoints()
@@ -284,31 +259,13 @@ namespace EdoliAddIn
 
                     Vector2 textPosition = midPoint + perpVector;
 
-                    // Add textbox
-                    var textBox = slide.Shapes.AddTextbox(
-                        MsoTextOrientation.msoTextOrientationHorizontal,
-                        textPosition.X,
-                        textPosition.Y,
-                        0,
-                        0);
+                    // Add textshape
+                    var textShape = AddDimensionTextShape(slide, textPosition.X, textPosition.Y, distanceText);
 
-                    textBox.TextFrame2.MarginLeft = 2;
-                    textBox.TextFrame2.MarginRight = 2;
-                    textBox.TextFrame2.MarginTop = 0;
-                    textBox.TextFrame2.MarginBottom = 0;
-
-                    textBox.TextFrame.TextRange.Font.Size = 8;
-                    textBox.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
-                    textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
-                    textBox.TextFrame.WordWrap = MsoTriState.msoFalse;
-                    textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
-
-                    textBox.TextFrame.TextRange.Text = distanceText;
-
-                    textBox.Top -= textBox.Height / 2;
+                    textShape.Top -= textShape.Height / 2;
 
                     // Rotate text bot to align with line
-                    textBox.Rotation = lineAngleDegrees;
+                    textShape.Rotation = lineAngleDegrees;
 
                     // Draw arrows
                     var startOffsetPos = start + perpVector;
@@ -316,8 +273,8 @@ namespace EdoliAddIn
 
                     var distanceLineA = slide.Shapes.AddLine(startOffsetPos.X, startOffsetPos.Y, 0, 0);
                     var distanceLineB = slide.Shapes.AddLine(endOffsetPos.X, endOffsetPos.Y, 0, 0);
-                    distanceLineA.ConnectorFormat.EndConnect(textBox, 2);
-                    distanceLineB.ConnectorFormat.EndConnect(textBox, 4);
+                    distanceLineA.ConnectorFormat.EndConnect(textShape, 2);
+                    distanceLineB.ConnectorFormat.EndConnect(textShape, 4);
 
                     // Arrowhead
                     distanceLineA.Line.BeginArrowheadStyle = MsoArrowheadStyle.msoArrowheadTriangle;
