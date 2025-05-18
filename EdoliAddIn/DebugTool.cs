@@ -17,17 +17,18 @@ namespace EdoliAddIn
         public static RibbonEditBox isConnector;
         public static RibbonEditBox typeField;
         public static RibbonEditBox autoTypeField;
+        public static RibbonEditBox nodeCount;
         public static RibbonEditBox node1;
         public static RibbonEditBox node2;
         public static void OnStart()
         {
             AddButton("ShowConnectors", ShowConnectors);
             AddButton("ConnectAll", ShapeTool.ConnectAllCandidates);
-            AddButton("TestShape", TestShape);
             numConnector = AddField("NumConnector");
             isConnector = AddField("isConnector");
             typeField = AddField("Type");
             autoTypeField = AddField("AutoType");
+            nodeCount = AddField("NodeCount");
             node1 = AddField("Node1");
             node2 = AddField("Node2");
         }
@@ -53,24 +54,10 @@ namespace EdoliAddIn
                 typeField.Text = shape.Type.ToString();
                 autoTypeField.Text = shape.AutoShapeType.ToString();
                 var nodes = shape.Nodes;
+                nodeCount.Text = nodes.Count.ToString();
                 node1.Text = nodes.Count > 0 ? NodeToString(nodes[1]) : "";
                 node2.Text = nodes.Count > 1 ? NodeToString(nodes[nodes.Count]) : "";
             }
-        }
-
-        public static void TestShape()
-        {
-            PowerPoint.Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
-
-            PowerPoint.FreeformBuilder freeform = slide.Shapes.BuildFreeform(MsoEditingType.msoEditingCorner, 0, 0);
-
-            freeform.AddNodes(MsoSegmentType.msoSegmentLine, MsoEditingType.msoEditingAuto, 
-                100, 100, 200, 200);
-
-            freeform.AddNodes(MsoSegmentType.msoSegmentLine, MsoEditingType.msoEditingAuto, 
-                300, 100, 400, 200);
-
-            PowerPoint.Shape shape = freeform.ConvertToShape();
         }
 
         public static string NodeToString(PowerPoint.ShapeNode node)
