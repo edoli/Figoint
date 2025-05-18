@@ -434,6 +434,29 @@ namespace EdoliAddIn
             return Anchor.None;
         }
 
+
+        public static List<Vector2> ClosePolygon(this List<Vector2> points)
+        {
+            if (points.Count == 0 || points[0] == points[points.Count - 1])
+            {
+                return points;
+            }
+            points.Add(points[0]);
+            return points;
+        }
+
+        public static Vector2[] ClosePolygon(this Vector2[] points)
+        {
+            if (points.Length == 0 || points[0] == points[points.Length - 1])
+            {
+                return points;
+            }
+            var newArray = new Vector2[points.Length + 1];
+            Array.Copy(points, newArray, points.Length);
+            newArray[points.Length] = points[0];
+            return newArray;
+        }
+
         /// <summary>
         /// Nodes에서 control 포인트들은 제외하고 실제 꼭지점들만 추출
         /// </summary>
@@ -480,7 +503,7 @@ namespace EdoliAddIn
 
             for (int i = 1; i <= shape.ConnectionSiteCount; i++)
             {
-                line.ConnectorFormat.EndConnect(shape, i + 1);
+                line.ConnectorFormat.EndConnect(shape, i);
                 float x = line.Left + line.Width;
                 float y = line.Top + line.Height;
 
@@ -529,20 +552,26 @@ namespace EdoliAddIn
             }
             else if (shape.Type == MsoShapeType.msoAutoShape)
             {
-                if (shape.AutoShapeType == MsoAutoShapeType.msoShapeRectangle)
+                switch (shape.AutoShapeType)
                 {
-                    return new Vector2[]
-                    {
+                    case MsoAutoShapeType.msoShapeRectangle:
+                        return new Vector2[]
+                        {
                         shape.PositionRot(Anchor.TopLeft),
                         shape.PositionRot(Anchor.TopRight),
                         shape.PositionRot(Anchor.BottomRight),
                         shape.PositionRot(Anchor.BottomLeft),
                         shape.PositionRot(Anchor.TopLeft)
-                    };
-                }
-                else if (shape.AutoShapeType == MsoAutoShapeType.msoShapeIsoscelesTriangle || shape.AutoShapeType == MsoAutoShapeType.msoShapeRightTriangle)
-                {
-                    return shape.GetConnectors(new int[] { 1, 5, 3, 1 });
+                        };
+                    case MsoAutoShapeType.msoShapeIsoscelesTriangle:
+                    case MsoAutoShapeType.msoShapeRightTriangle:
+                        return shape.GetConnectors(new int[] { 1, 5, 3, 1 });
+                    case MsoAutoShapeType.msoShapeDiamond:
+                        return shape.GetConnectors().ClosePolygon();
+                    case MsoAutoShapeType.msoShapeRegularPentagon:
+                        return shape.GetConnectors(new int[] { 1, 2, 3, 5, 6 });
+                    case MsoAutoShapeType.msoShapeHexagon:
+                        return shape.GetConnectors().ClosePolygon();
                 }
             }
             return new Vector2[0];

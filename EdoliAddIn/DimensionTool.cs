@@ -13,7 +13,7 @@ namespace EdoliAddIn
 
         private static float shapeScale = 28.3465f;
 
-        private static PowerPoint.Shape AddDimensionTextShape(PowerPoint.Slide slide, float x, float y, String text)
+        private static PowerPoint.Shape AddDimensionTextbox(Slide slide, float x, float y, String text)
         {
             // Add textbox
             var textBox = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, x, y, 0, 0);
@@ -30,6 +30,9 @@ namespace EdoliAddIn
             textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
 
             textBox.TextFrame.TextRange.Text = text;
+
+            // text의 센터가 x, y에 오도록 위치 조정
+            textBox.Top -= textBox.Height / 2;
 
             return textBox;
         }
@@ -198,12 +201,7 @@ namespace EdoliAddIn
             }
             else
             {
-                var shape = slide.Shapes.AddShape(
-                    MsoAutoShapeType.msoShapeArc,
-                    x,
-                    y - radius,
-                    radius,
-                    radius);
+                var shape = slide.Shapes.AddShape(MsoAutoShapeType.msoShapeArc, x, y - radius, radius, radius);
 
                 shape.Adjustments[1] = startAngleDegrees;
                 shape.Adjustments[2] = endAngleDegrees;
@@ -213,9 +211,12 @@ namespace EdoliAddIn
             string angleText = Math.Round(angle, 1).ToString() + "°";
 
             // Move text to the middle of the arc
-            float textX = x + (float)Math.Cos(midAngleRadians) * (radius * 1.5f);
-            float textY = y + (float)Math.Sin(midAngleRadians) * (radius * 1.5f);
-            var textShape = AddDimensionTextShape(slide, textX, textY, angleText);
+            float radiusScale = isRightAngle ? 1.5f : 1.2f;
+            var textbox = AddDimensionTextbox(slide, 0, 0, angleText);
+            float textX = x + (float)Math.Cos(midAngleRadians) * (radius * radiusScale + textbox.Width / 2);
+            float textY = y + (float)Math.Sin(midAngleRadians) * (radius * radiusScale + textbox.Height / 2);
+            textbox.Left = textX - textbox.Width / 2;
+            textbox.Top = textY - textbox.Height / 2;
         }
 
         public static void DistanceBetweenPoints()
@@ -259,13 +260,11 @@ namespace EdoliAddIn
 
                     Vector2 textPosition = midPoint + perpVector;
 
-                    // Add textshape
-                    var textShape = AddDimensionTextShape(slide, textPosition.X, textPosition.Y, distanceText);
-
-                    textShape.Top -= textShape.Height / 2;
+                    // Add text box
+                    var textbox = AddDimensionTextbox(slide, textPosition.X, textPosition.Y, distanceText);
 
                     // Rotate text bot to align with line
-                    textShape.Rotation = lineAngleDegrees;
+                    textbox.Rotation = lineAngleDegrees;
 
                     // Draw arrows
                     var startOffsetPos = start + perpVector;
@@ -273,8 +272,8 @@ namespace EdoliAddIn
 
                     var distanceLineA = slide.Shapes.AddLine(startOffsetPos.X, startOffsetPos.Y, 0, 0);
                     var distanceLineB = slide.Shapes.AddLine(endOffsetPos.X, endOffsetPos.Y, 0, 0);
-                    distanceLineA.ConnectorFormat.EndConnect(textShape, 2);
-                    distanceLineB.ConnectorFormat.EndConnect(textShape, 4);
+                    distanceLineA.ConnectorFormat.EndConnect(textbox, 2);
+                    distanceLineB.ConnectorFormat.EndConnect(textbox, 4);
 
                     // Arrowhead
                     distanceLineA.Line.BeginArrowheadStyle = MsoArrowheadStyle.msoArrowheadTriangle;

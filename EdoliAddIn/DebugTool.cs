@@ -3,6 +3,7 @@ using Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
@@ -156,19 +157,42 @@ namespace EdoliAddIn
                     float x = line.Left + line.Width;
                     float y = line.Top + line.Height;
 
-                    var textBox = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, x, y, 1, 1);
-
-                    var textFrame = textBox.TextFrame2;
-                    textBox.TextFrame2.TextRange.Text = (i + 1).ToString();
-                    textFrame.AutoSize = MsoAutoSize.msoAutoSizeShapeToFitText;
-                    textFrame.WordWrap = MsoTriState.msoFalse;
-
-                    textBox.Left -= textBox.Width / 2;
-                    textBox.Top -= textBox.Height / 2;
+                    var textBox = AddDebugTextbox(slide, x, y, (i + 1).ToString());
                 }
             }
 
             line.Delete();
+        }
+
+        private static PowerPoint.Shape AddDebugTextbox(Slide slide, float x, float y, String text)
+        {
+            // Add textbox
+            var textBox = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal, x, y, 0, 0);
+
+            textBox.TextFrame2.MarginLeft = 0;
+            textBox.TextFrame2.MarginRight = 0;
+            textBox.TextFrame2.MarginTop = 0;
+            textBox.TextFrame2.MarginBottom = 0;
+
+            textBox.TextFrame.TextRange.Font.Size = 12;
+            textBox.TextFrame.TextRange.Font.Bold = MsoTriState.msoTrue;
+            textBox.TextFrame.TextRange.Font.Color.RGB = (int)ColorTranslator.ToOle(Color.Red);
+            textBox.TextFrame.TextRange.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
+            textBox.TextFrame.WordWrap = MsoTriState.msoFalse;
+            textBox.TextFrame.AutoSize = PpAutoSize.ppAutoSizeShapeToFitText;
+
+
+            // �ؽ�Ʈ�� ������ �ܰ��� �߰�
+            textBox.TextFrame2.TextRange.Font.Line.Visible = MsoTriState.msoTrue;
+            textBox.TextFrame2.TextRange.Font.Line.ForeColor.RGB = (int)ColorTranslator.ToOle(Color.Black);
+            textBox.TextFrame2.TextRange.Font.Line.Weight = 0.25f;
+
+            textBox.TextFrame.TextRange.Text = text;
+
+            // text�� ���Ͱ� x, y�� ������ ��ġ ����
+            textBox.Top -= textBox.Height / 2;
+
+            return textBox;
         }
     }
 }
