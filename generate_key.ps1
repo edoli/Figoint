@@ -7,5 +7,6 @@ $cert = New-SelfSignedCertificate `
     -KeyUsage DigitalSignature `
     -Type CodeSigningCert
 
-$CertPassword = ConvertTo-SecureString -String "StringPassword" -Force -AsPlainText
-Export-PfxCertificate -Cert $cert -FilePath "EdoliAddIn/EdoliAddIn_Temporary.pfx" -Password $CertPassword
+$CertPassword = Read-Host -Prompt "Enter password for PFX file" -AsSecureString
+Export-PfxCertificate -Cert $cert -FilePath "signing_cert.pfx" -Password $CertPassword
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("signing_cert.pfx")) | Out-File -Encoding ascii CERT_PFX_BASE64.txt
