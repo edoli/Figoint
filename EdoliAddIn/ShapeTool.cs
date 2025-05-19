@@ -370,6 +370,12 @@ namespace EdoliAddIn
 
             line.Delete();
 
+            if (connectors.Count == 0)
+            {
+                MessageBox.Show("Connector가 없습니다.");
+                return;
+            }
+
              var searchTree = new KdTree<ConnectorInfo>(connectors);
 
             foreach (var shape in connectorShapes)
