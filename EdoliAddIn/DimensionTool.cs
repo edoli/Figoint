@@ -11,7 +11,9 @@ namespace EdoliAddIn
     public static class DimensionTool
     {
 
-        private static float shapeScale = 28.3465f;
+        private const float shapeScaleDefault = 28.3465f;
+
+        private static float shapeScale = shapeScaleDefault;
 
         private static PowerPoint.Shape AddDimensionTextbox(Slide slide, float x, float y, String text)
         {
@@ -265,6 +267,8 @@ namespace EdoliAddIn
 
                     // Rotate text bot to align with line
                     textbox.Rotation = lineAngleDegrees;
+                    textbox.Left = textPosition.X - textbox.Width / 2;
+                    textbox.Top = textPosition.Y - textbox.Height / 2;
 
                     // Draw arrows
                     var startOffsetPos = start + perpVector;
@@ -281,5 +285,94 @@ namespace EdoliAddIn
                 }
             }
         }
+
+        public static void ResetDimensionScale()
+        {
+            Globals.ThisAddIn.Application.StartNewUndoEntry();
+            var shapes = Util.ListSelectedShapes();
+
+            if (shapes.Count == 2)
+            {
+                PowerPoint.Shape lineShape = null;
+                PowerPoint.Shape textShape = null;
+
+                foreach (var shape in shapes)
+                {
+                    if (shape.Type == MsoShapeType.msoLine)
+                    {
+                        lineShape = shape;
+                    }
+                    else if (shape.HasTextFrame == MsoTriState.msoTrue)
+                    {
+                        textShape = shape;
+                    }
+                }
+
+                if (lineShape != null && textShape != null)
+                {
+                    var vertices = lineShape.GetVertices();
+                    float pixelLength = Vector2.Distance(vertices[0], vertices[1]);
+
+                    string text = textShape.TextFrame.TextRange.Text.Trim();
+
+                    // 숫자 부분과 단위 부분 분리
+                    float value = ExtractNumberFromText(text, out string unit);
+
+                    if (value <= 0)
+                    {
+                        System.Windows.Forms.MessageBox.Show("텍스트에서 유효한 치수를 찾을 수 없습니다.", "경고");
+                        return;
+                    }
+
+                    switch (unit.ToLower())
+                    {
+                        case "km": value *= 1e+5f; break;
+                        case "m": value *= 1e+2f; break;
+                        case "mm": value *= 1e-1f; break;
+                        case "um": value *= 1e-4f; break;
+                        case "nm": value *= 1e-7f; break;
+                    }
+
+                    // shapeScale 계산: 픽셀 / cm
+                    shapeScale = pixelLength / value;
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("선과 텍스트가 각각 1개씩 선택되어야 합니다.", "경고");
+                }
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("선과 텍스트가 각각 1개씩 선택되어야 합니다.", "경고");
+            }
+        }
+
+        private static float ExtractNumberFromText(string text, out string unit)
+        {
+            unit = "cm"; // 기본 단위는 cm
+
+            System.Text.RegularExpressions.Match match =
+                System.Text.RegularExpressions.Regex.Match(text, @"(\d+[.,]?\d*)(?:\s*)([a-zA-Z]*)?");
+
+            if (match.Success)
+            {
+                // 단위가 있으면 추출
+                if (match.Groups[2].Success && !string.IsNullOrWhiteSpace(match.Groups[2].Value))
+                {
+                    unit = match.Groups[2].Value.ToLower();
+                }
+
+                // 숫자 부분 추출 및 변환
+                string numberText = match.Groups[1].Value.Replace(',', '.');
+                if (float.TryParse(numberText, System.Globalization.NumberStyles.Any,
+                                   System.Globalization.CultureInfo.InvariantCulture, out float number))
+                {
+                    return number;
+                }
+            }
+
+            return 0;
+        }
+
     }
 }

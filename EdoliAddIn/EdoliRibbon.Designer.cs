@@ -1,4 +1,4 @@
-﻿namespace EdoliAddIn
+namespace EdoliAddIn
 {
     partial class EdoliRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
@@ -35,7 +35,7 @@
         private void InitializeComponent()
         {
             this.tab1 = this.Factory.CreateRibbonTab();
-            this.shape = this.Factory.CreateRibbonGroup();
+            this.shapeGroup = this.Factory.CreateRibbonGroup();
             this.beginArrowToggle = this.Factory.CreateRibbonButton();
             this.beginArrowSizeUp = this.Factory.CreateRibbonButton();
             this.beginArrowSizeDown = this.Factory.CreateRibbonButton();
@@ -44,8 +44,6 @@
             this.endArrowSizeDown = this.Factory.CreateRibbonButton();
             this.connectShapeByLine = this.Factory.CreateRibbonButton();
             this.trimImage = this.Factory.CreateRibbonButton();
-            this.drawAngle = this.Factory.CreateRibbonButton();
-            this.drawDimension = this.Factory.CreateRibbonButton();
             this.SVGTool = this.Factory.CreateRibbonButton();
             this.alignGroup = this.Factory.CreateRibbonGroup();
             this.labelBottom = this.Factory.CreateRibbonButton();
@@ -63,10 +61,14 @@
             this.alignGrid = this.Factory.CreateRibbonButton();
             this.resizeWidth = this.Factory.CreateRibbonButton();
             this.resizeHeight = this.Factory.CreateRibbonButton();
-            this.groupGrid = this.Factory.CreateRibbonGroup();
+            this.gridGroup = this.Factory.CreateRibbonGroup();
             this.grid = this.Factory.CreateRibbonButton();
             this.gridPadding = this.Factory.CreateRibbonEditBox();
             this.gridNumColumn = this.Factory.CreateRibbonEditBox();
+            this.dimensionGroup = this.Factory.CreateRibbonGroup();
+            this.drawAngle = this.Factory.CreateRibbonButton();
+            this.drawDimension = this.Factory.CreateRibbonButton();
+            this.resetDimension = this.Factory.CreateRibbonButton();
             this.equationGroup = this.Factory.CreateRibbonGroup();
             this.box1 = this.Factory.CreateRibbonBox();
             this.curveOfEquation = this.Factory.CreateRibbonButton();
@@ -79,9 +81,10 @@
             this.animationName = this.Factory.CreateRibbonEditBox();
             this.followAnimation = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
-            this.shape.SuspendLayout();
+            this.shapeGroup.SuspendLayout();
             this.alignGroup.SuspendLayout();
-            this.groupGrid.SuspendLayout();
+            this.gridGroup.SuspendLayout();
+            this.dimensionGroup.SuspendLayout();
             this.equationGroup.SuspendLayout();
             this.box1.SuspendLayout();
             this.animationGroup.SuspendLayout();
@@ -91,29 +94,28 @@
             // 
             this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tab1.ControlId.OfficeId = "TabHome";
-            this.tab1.Groups.Add(this.shape);
+            this.tab1.Groups.Add(this.shapeGroup);
             this.tab1.Groups.Add(this.alignGroup);
-            this.tab1.Groups.Add(this.groupGrid);
+            this.tab1.Groups.Add(this.gridGroup);
+            this.tab1.Groups.Add(this.dimensionGroup);
             this.tab1.Groups.Add(this.equationGroup);
             this.tab1.Groups.Add(this.animationGroup);
             this.tab1.Label = "TabHome";
             this.tab1.Name = "tab1";
             // 
-            // shape
+            // shapeGroup
             // 
-            this.shape.Items.Add(this.beginArrowToggle);
-            this.shape.Items.Add(this.beginArrowSizeUp);
-            this.shape.Items.Add(this.beginArrowSizeDown);
-            this.shape.Items.Add(this.endArrowToggle);
-            this.shape.Items.Add(this.endArrowSizeUp);
-            this.shape.Items.Add(this.endArrowSizeDown);
-            this.shape.Items.Add(this.connectShapeByLine);
-            this.shape.Items.Add(this.trimImage);
-            this.shape.Items.Add(this.drawAngle);
-            this.shape.Items.Add(this.drawDimension);
-            this.shape.Items.Add(this.SVGTool);
-            this.shape.Label = "Shape";
-            this.shape.Name = "shape";
+            this.shapeGroup.Items.Add(this.beginArrowToggle);
+            this.shapeGroup.Items.Add(this.beginArrowSizeUp);
+            this.shapeGroup.Items.Add(this.beginArrowSizeDown);
+            this.shapeGroup.Items.Add(this.endArrowToggle);
+            this.shapeGroup.Items.Add(this.endArrowSizeUp);
+            this.shapeGroup.Items.Add(this.endArrowSizeDown);
+            this.shapeGroup.Items.Add(this.connectShapeByLine);
+            this.shapeGroup.Items.Add(this.trimImage);
+            this.shapeGroup.Items.Add(this.SVGTool);
+            this.shapeGroup.Label = "Shape";
+            this.shapeGroup.Name = "shapeGroup";
             // 
             // beginArrowToggle
             // 
@@ -200,28 +202,6 @@
             this.trimImage.ShowLabel = false;
             this.trimImage.SuperTip = "Trim blank area of images";
             this.trimImage.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.trimImage_Click);
-            // 
-            // drawAngle
-            // 
-            this.drawAngle.Image = global::EdoliAddIn.Properties.Resources.icon_draw_angle;
-            this.drawAngle.Label = "Draw angle";
-            this.drawAngle.Name = "drawAngle";
-            this.drawAngle.ScreenTip = "Draw angle";
-            this.drawAngle.ShowImage = true;
-            this.drawAngle.ShowLabel = false;
-            this.drawAngle.SuperTip = "Draw angle";
-            this.drawAngle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawAngle_Click);
-            // 
-            // drawDimension
-            // 
-            this.drawDimension.Image = global::EdoliAddIn.Properties.Resources.icon_draw_dimension;
-            this.drawDimension.Label = "Draw dimension";
-            this.drawDimension.Name = "drawDimension";
-            this.drawDimension.ScreenTip = "Draw dimension";
-            this.drawDimension.ShowImage = true;
-            this.drawDimension.ShowLabel = false;
-            this.drawDimension.SuperTip = "Draw dimension";
-            this.drawDimension.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawDimension_Click);
             // 
             // SVGTool
             // 
@@ -419,13 +399,13 @@
             this.resizeHeight.SuperTip = "Resize the height of selected objects to match the last selected object";
             this.resizeHeight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.resizeHeight_Click);
             // 
-            // groupGrid
+            // gridGroup
             // 
-            this.groupGrid.Items.Add(this.grid);
-            this.groupGrid.Items.Add(this.gridPadding);
-            this.groupGrid.Items.Add(this.gridNumColumn);
-            this.groupGrid.Label = "Grid";
-            this.groupGrid.Name = "groupGrid";
+            this.gridGroup.Items.Add(this.grid);
+            this.gridGroup.Items.Add(this.gridPadding);
+            this.gridGroup.Items.Add(this.gridNumColumn);
+            this.gridGroup.Label = "Grid";
+            this.gridGroup.Name = "gridGroup";
             // 
             // grid
             // 
@@ -454,6 +434,47 @@
             this.gridNumColumn.SizeString = "000";
             this.gridNumColumn.SuperTip = "Set the number of columns in the grid";
             this.gridNumColumn.Text = "0";
+            // 
+            // dimensionGroup
+            // 
+            this.dimensionGroup.Items.Add(this.drawAngle);
+            this.dimensionGroup.Items.Add(this.drawDimension);
+            this.dimensionGroup.Items.Add(this.resetDimension);
+            this.dimensionGroup.Label = "Dimension";
+            this.dimensionGroup.Name = "dimensionGroup";
+            // 
+            // drawAngle
+            // 
+            this.drawAngle.Image = global::EdoliAddIn.Properties.Resources.icon_draw_angle;
+            this.drawAngle.Label = "Draw angle";
+            this.drawAngle.Name = "drawAngle";
+            this.drawAngle.ScreenTip = "Draw angle";
+            this.drawAngle.ShowImage = true;
+            this.drawAngle.ShowLabel = false;
+            this.drawAngle.SuperTip = "Draw angle";
+            this.drawAngle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawAngle_Click);
+            // 
+            // drawDimension
+            // 
+            this.drawDimension.Image = global::EdoliAddIn.Properties.Resources.icon_draw_dimension;
+            this.drawDimension.Label = "Draw dimension";
+            this.drawDimension.Name = "drawDimension";
+            this.drawDimension.ScreenTip = "Draw dimension";
+            this.drawDimension.ShowImage = true;
+            this.drawDimension.ShowLabel = false;
+            this.drawDimension.SuperTip = "Draw dimension";
+            this.drawDimension.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.drawDimension_Click);
+            // 
+            // resetDimension
+            // 
+            this.resetDimension.Image = global::EdoliAddIn.Properties.Resources.icon_draw_dimension;
+            this.resetDimension.Label = "Reset dimension";
+            this.resetDimension.Name = "resetDimension";
+            this.resetDimension.ScreenTip = "Reset dimension";
+            this.resetDimension.ShowImage = true;
+            this.resetDimension.ShowLabel = false;
+            this.resetDimension.SuperTip = "Reset dimension";
+            this.resetDimension.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.resetDimension_Click);
             // 
             // equationGroup
             // 
@@ -568,12 +589,14 @@
             this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.EdoliRibbon_Load);
             this.tab1.ResumeLayout(false);
             this.tab1.PerformLayout();
-            this.shape.ResumeLayout(false);
-            this.shape.PerformLayout();
+            this.shapeGroup.ResumeLayout(false);
+            this.shapeGroup.PerformLayout();
             this.alignGroup.ResumeLayout(false);
             this.alignGroup.PerformLayout();
-            this.groupGrid.ResumeLayout(false);
-            this.groupGrid.PerformLayout();
+            this.gridGroup.ResumeLayout(false);
+            this.gridGroup.PerformLayout();
+            this.dimensionGroup.ResumeLayout(false);
+            this.dimensionGroup.PerformLayout();
             this.equationGroup.ResumeLayout(false);
             this.equationGroup.PerformLayout();
             this.box1.ResumeLayout(false);
@@ -587,26 +610,29 @@
         #endregion
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
+
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup alignGroup;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup animationGroup;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup gridGroup;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup shapeGroup;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup dimensionGroup;
+
         internal Microsoft.Office.Tools.Ribbon.RibbonButton grid;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton labelBottom;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton labelTop;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton labelLeft;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton labelRight;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup animationGroup;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox animationName;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton transpose;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton groupLabel;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton alignPrevSlide;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox gridNumColumn;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox gridPadding;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup groupGrid;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton swapCycle;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton swapCycleReverse;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton snapDownRight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton snapUpRight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton alignNextSlide;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup shape;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton beginArrowToggle;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton beginArrowSizeUp;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton beginArrowSizeDown;
@@ -632,6 +658,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton SVGTool;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton drawAngle;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton drawDimension;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton resetDimension;
     }
 
     partial class ThisRibbonCollection

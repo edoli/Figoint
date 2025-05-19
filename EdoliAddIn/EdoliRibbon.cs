@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+using Microsoft.Office.Tools.Ribbon;
 
 namespace EdoliAddIn
 {
@@ -134,6 +134,10 @@ namespace EdoliAddIn
         private void drawDimension_Click(object sender, RibbonControlEventArgs e)
         {
             DimensionTool.DistanceBetweenPoints();
+        }
+        private void resetDimension_Click(object sender, RibbonControlEventArgs e)
+        {
+            DimensionTool.ResetDimensionScale();
         }
 
         private void curveOfEquation_Click(object sender, RibbonControlEventArgs e)
