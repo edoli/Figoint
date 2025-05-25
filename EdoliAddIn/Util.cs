@@ -142,17 +142,17 @@ namespace EdoliAddIn
 
             if (a1 > 0 || a4 > 0)
             {
-                linePoints.x1 = shape.Left();
-                linePoints.y1 = shape.Bottom();
-                linePoints.x2 = shape.Right();
-                linePoints.y2 = shape.Top();
+                linePoints.x1 = shape.VisualLeft();
+                linePoints.y1 = shape.VisualBottom();
+                linePoints.x2 = shape.VisualRight();
+                linePoints.y2 = shape.VisualTop();
             } 
             else if (a2 > 0 || a3 > 0)
             {
-                linePoints.x1 = shape.Left();
-                linePoints.y1 = shape.Top();
-                linePoints.x2 = shape.Right();
-                linePoints.y2 = shape.Bottom();
+                linePoints.x1 = shape.VisualLeft();
+                linePoints.y1 = shape.VisualTop();
+                linePoints.x2 = shape.VisualRight();
+                linePoints.y2 = shape.VisualBottom();
 
             }
             return linePoints;

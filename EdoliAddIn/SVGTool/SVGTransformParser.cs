@@ -99,7 +99,7 @@ namespace EdoliAddIn
 
         private static void RotateShape(PowerPoint.Shape shape, float angle, Vector2 pivot)
         {
-            Vector2 center = shape.Position(ShapeExt.Anchor.Center);
+            Vector2 center = shape.VisualPosition(ShapeExt.Anchor.Center);
             Vector2 pivotDir = pivot - center;
             Vector2 pivotDirRotated = pivotDir.RotateDeg(angle);
             Vector2 moved = pivotDirRotated - pivotDir;

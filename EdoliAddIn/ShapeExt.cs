@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
 namespace EdoliAddIn
@@ -35,6 +37,9 @@ namespace EdoliAddIn
             }
         }
 
+        /// <summary>
+        /// Shape이 group인 경우 안에 item들에 대해서 action을 수행함 
+        /// </summary>
         public static void DoRecur(this PowerPoint.Shape shape, Action<PowerPoint.Shape> action)
         {
             if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoGroup)
@@ -50,6 +55,14 @@ namespace EdoliAddIn
             }
         }
 
+        /// <summary>
+        /// 현재 <paramref name="shape"/>의 크기, 회전, 위치를 <paramref name="other"/>와 일치시킵니다.
+        /// <paramref name="keepAspectRatio"/>가 true이면, 가로 비율에 맞춰 세로 크기를 조정하여 종횡비를 유지합니다.
+        /// 위치는 회전된 상태에서의 좌상단 기준으로 맞춥니다.
+        /// </summary>
+        /// <param name="shape">변경할 대상 도형</param>
+        /// <param name="other">기준이 되는 도형</param>
+        /// <param name="keepAspectRatio">종횡비 유지 여부</param>
         public static void Match(this PowerPoint.Shape shape, PowerPoint.Shape other, bool keepAspectRatio)
         {
             shape.Rotation = other.Rotation;
@@ -74,6 +87,14 @@ namespace EdoliAddIn
             shape.Left = other.Left + offset.X;
             shape.Top = other.Top + offset.Y;
         }
+        public static RectangleF Rect(this PowerPoint.Shape shape)
+        {
+            return new RectangleF(shape.Left, shape.Top, shape.Width, shape.Height);
+        }
+        public static RectangleF VisualRect(this PowerPoint.Shape shape)
+        {
+            return new RectangleF(shape.VisualLeft(), shape.VisualTop(), shape.VisualWidth(), shape.VisualHeight());
+        }
 
         public static float RotationRad(this PowerPoint.Shape shape)
         {
@@ -81,24 +102,24 @@ namespace EdoliAddIn
         }
 
         // Visual size, position. Real visual bound of shapes.
-        public static float Width(this PowerPoint.Shape shape)
+        public static float VisualWidth(this PowerPoint.Shape shape)
         {
             float rotation = shape.RotationRad();
             return (float)(Math.Abs(Math.Cos(rotation)) * shape.Width + Math.Abs(Math.Sin(rotation)) * shape.Height);
         }
 
-        public static float Height(this PowerPoint.Shape shape)
+        public static float VisualHeight(this PowerPoint.Shape shape)
         {
             float rotation = shape.RotationRad();
             return (float)(Math.Abs(Math.Sin(rotation)) * shape.Width + Math.Abs(Math.Cos(rotation)) * shape.Height);
         }
 
-        public static Vector2 Size(this PowerPoint.Shape shape)
+        public static Vector2 VisualSize(this PowerPoint.Shape shape)
         {
-            return new Vector2(Width(shape), Height(shape));
+            return new Vector2(VisualWidth(shape), VisualHeight(shape));
         }
 
-        public static void SetSize(this PowerPoint.Shape shape, float width, float height)
+        public static void SetVisualSize(this PowerPoint.Shape shape, float width, float height)
         {
             float rotation = shape.RotationRad();
             float cps = (float)(Math.Abs(Math.Cos(rotation)) + Math.Abs(Math.Sin(rotation)));
@@ -109,74 +130,74 @@ namespace EdoliAddIn
             shape.Height = (wph - wmh) / 2.0f;
         }
 
-        public static void SetSize(this PowerPoint.Shape shape, Vector2 size)
+        public static void SetVisualSize(this PowerPoint.Shape shape, Vector2 size)
         {
-            SetSize(shape, size.X, size.Y);
+            SetVisualSize(shape, size.X, size.Y);
         }
 
-        public static float Left(this PowerPoint.Shape shape)
+        public static float VisualLeft(this PowerPoint.Shape shape)
         {
-            float offset = (Width(shape) - shape.Width) / 2;
+            float offset = (VisualWidth(shape) - shape.Width) / 2;
             return shape.Left - offset;
         }
 
-        public static void SetLeft(this PowerPoint.Shape shape, float value)
+        public static void SetVisualLeft(this PowerPoint.Shape shape, float value)
         {
-            float offset = (Width(shape) - shape.Width) / 2;
+            float offset = (VisualWidth(shape) - shape.Width) / 2;
             shape.Left = value + offset;
         }
 
-        public static float Right(this PowerPoint.Shape shape)
+        public static float VisualRight(this PowerPoint.Shape shape)
         {
-            float width = Width(shape);
+            float width = VisualWidth(shape);
             float offset = (width - shape.Width) / 2;
             return shape.Left + width - offset;
         }
 
-        public static void SetRight(this PowerPoint.Shape shape, float value)
+        public static void SetVisualRight(this PowerPoint.Shape shape, float value)
         {
-            float width = Width(shape);
+            float width = VisualWidth(shape);
             float offset = (width - shape.Width) / 2;
             shape.Left = value - width + offset;
         }
 
-        public static float Top(this PowerPoint.Shape shape)
+        public static float VisualTop(this PowerPoint.Shape shape)
         {
-            float offset = (Height(shape) - shape.Height) / 2;
+            float offset = (VisualHeight(shape) - shape.Height) / 2;
             return shape.Top - offset;
         }
 
-        public static void SetTop(this PowerPoint.Shape shape, float value)
+        public static void SetVisualTop(this PowerPoint.Shape shape, float value)
         {
-            float offset = (Height(shape) - shape.Height) / 2;
+            float offset = (VisualHeight(shape) - shape.Height) / 2;
             shape.Top = value + offset;
         }
 
-        public static float Bottom(this PowerPoint.Shape shape)
+        public static float VisualBottom(this PowerPoint.Shape shape)
         {
-            float height = Height(shape);
+            float height = VisualHeight(shape);
             float offset = (height - shape.Height) / 2;
             return shape.Top + height - offset;
         }
 
-        public static void SetBottom(this PowerPoint.Shape shape, float value)
+        public static void SetVisualBottom(this PowerPoint.Shape shape, float value)
         {
-            float height = Height(shape);
+            float height = VisualHeight(shape);
             float offset = (height - shape.Height) / 2;
             shape.Top = value - height + offset;
         }
 
         public static float DistanceOfShapes(PowerPoint.Shape shapeA, PowerPoint.Shape shapeB)
         {
-            var left1 = shapeA.Left();
-            var right1 = shapeA.Right();
-            var top1 = shapeA.Top();
-            var bottom1 = shapeA.Bottom();
+            var left1 = shapeA.VisualLeft();
+            var right1 = shapeA.VisualRight();
+            var top1 = shapeA.VisualTop();
+            var bottom1 = shapeA.VisualBottom();
 
-            var left2 = shapeB.Left();
-            var right2 = shapeB.Right();
-            var top2 = shapeB.Top();
-            var bottom2 = shapeB.Bottom();
+            var left2 = shapeB.VisualLeft();
+            var right2 = shapeB.VisualRight();
+            var top2 = shapeB.VisualTop();
+            var bottom2 = shapeB.VisualBottom();
 
             return Util.RectangleDistance(left1, top1, right1, bottom1, left2, top2, right2, bottom2);
         }
@@ -189,8 +210,8 @@ namespace EdoliAddIn
             } 
             else
             {
-                var p1 = shapeA.Position(anchor);
-                var p2 = shapeB.Position(anchor);
+                var p1 = shapeA.VisualPosition(anchor);
+                var p2 = shapeB.VisualPosition(anchor);
                 return Vector2.Distance(p1, p2);
             }
         }
@@ -202,18 +223,18 @@ namespace EdoliAddIn
             }
             else if (anchorA == Anchor.None)
             {
-                var p2 = shapeB.Position(anchorB);
-                return Util.RectanglePointDistance(shapeA.Left(), shapeA.Top(), shapeA.Right(), shapeA.Bottom(), p2.X, p2.Y);
+                var p2 = shapeB.VisualPosition(anchorB);
+                return Util.RectanglePointDistance(shapeA.VisualLeft(), shapeA.VisualTop(), shapeA.VisualRight(), shapeA.VisualBottom(), p2.X, p2.Y);
             }
             else if (anchorB == Anchor.None)
             {
-                var p1 = shapeA.Position(anchorA);
-                return Util.RectanglePointDistance(shapeB.Left(), shapeB.Top(), shapeB.Right(), shapeB.Bottom(), p1.X, p1.Y);
+                var p1 = shapeA.VisualPosition(anchorA);
+                return Util.RectanglePointDistance(shapeB.VisualLeft(), shapeB.VisualTop(), shapeB.VisualRight(), shapeB.VisualBottom(), p1.X, p1.Y);
             }
             else
             {
-                var p1 = shapeA.Position(anchorA);
-                var p2 = shapeB.Position(anchorB);
+                var p1 = shapeA.VisualPosition(anchorA);
+                var p2 = shapeB.VisualPosition(anchorB);
                 return Vector2.Distance(p1, p2);
             }
         }
@@ -222,28 +243,28 @@ namespace EdoliAddIn
         /// Get the position of the shape based on the specified anchor point.
         /// based on real visual bound of shapes.
         /// </summary>
-        public static Vector2 Position(this PowerPoint.Shape shape, Anchor anchor)
+        public static Vector2 VisualPosition(this PowerPoint.Shape shape, Anchor anchor)
         {
             switch (anchor)
             {
                 case Anchor.Left:
-                    return new Vector2(shape.Left(), shape.Top() + shape.Height() / 2);
+                    return new Vector2(shape.VisualLeft(), shape.VisualTop() + shape.VisualHeight() / 2);
                 case Anchor.Right:
-                    return new Vector2(shape.Left() + shape.Width(), shape.Top() + shape.Height() / 2);
+                    return new Vector2(shape.VisualLeft() + shape.VisualWidth(), shape.VisualTop() + shape.VisualHeight() / 2);
                 case Anchor.Top:
-                    return new Vector2(shape.Left() + shape.Width() / 2, shape.Top());
+                    return new Vector2(shape.VisualLeft() + shape.VisualWidth() / 2, shape.VisualTop());
                 case Anchor.Bottom:
-                    return new Vector2(shape.Left() + shape.Width() / 2, shape.Top() + shape.Height());
+                    return new Vector2(shape.VisualLeft() + shape.VisualWidth() / 2, shape.VisualTop() + shape.VisualHeight());
                 case Anchor.TopLeft:
-                    return new Vector2(shape.Left(), shape.Top());
+                    return new Vector2(shape.VisualLeft(), shape.VisualTop());
                 case Anchor.TopRight:
-                    return new Vector2(shape.Left() + shape.Width(), shape.Top());
+                    return new Vector2(shape.VisualLeft() + shape.VisualWidth(), shape.VisualTop());
                 case Anchor.BottomLeft:
-                    return new Vector2(shape.Left(), shape.Top() + shape.Height());
+                    return new Vector2(shape.VisualLeft(), shape.VisualTop() + shape.VisualHeight());
                 case Anchor.BottomRight:
-                    return new Vector2(shape.Left() + shape.Width(), shape.Top() + shape.Height());
+                    return new Vector2(shape.VisualLeft() + shape.VisualWidth(), shape.VisualTop() + shape.VisualHeight());
                 case Anchor.Center:
-                    return new Vector2(shape.Left() + shape.Width() / 2, shape.Top() + shape.Height() / 2);
+                    return new Vector2(shape.VisualLeft() + shape.VisualWidth() / 2, shape.VisualTop() + shape.VisualHeight() / 2);
                 default:
                     throw new ArgumentException("Invalid anchor point", nameof(anchor));
             }
@@ -253,7 +274,7 @@ namespace EdoliAddIn
         /// Get the position of the shape based on the specified anchor point.
         /// based on original bound of shapes.
         /// </summary>
-        public static Vector2 PositionRot(this PowerPoint.Shape shape, Anchor anchor)
+        public static Vector2 VertexPosition(this PowerPoint.Shape shape, Anchor anchor)
         {
             Vector2 center = new Vector2(shape.Left + shape.Width / 2, shape.Top + shape.Height / 2);
             Vector2 vector;
@@ -299,46 +320,46 @@ namespace EdoliAddIn
             {
                 case Anchor.Left:
                     newLeft = position.X;
-                    newTop = position.Y - shape.Height() / 2;
+                    newTop = position.Y - shape.VisualHeight() / 2;
                     break;
                 case Anchor.Right:
-                    newLeft = position.X - shape.Width();
-                    newTop = position.Y - shape.Height() / 2;
+                    newLeft = position.X - shape.VisualWidth();
+                    newTop = position.Y - shape.VisualHeight() / 2;
                     break;
                 case Anchor.Top:
-                    newLeft = position.X - shape.Width() / 2;
+                    newLeft = position.X - shape.VisualWidth() / 2;
                     newTop = position.Y;
                     break;
                 case Anchor.Bottom:
-                    newLeft = position.X - shape.Width() / 2;
-                    newTop = position.Y - shape.Height();
+                    newLeft = position.X - shape.VisualWidth() / 2;
+                    newTop = position.Y - shape.VisualHeight();
                     break;
                 case Anchor.TopLeft:
                     newLeft = position.X;
                     newTop = position.Y;
                     break;
                 case Anchor.TopRight:
-                    newLeft = position.X - shape.Width();
+                    newLeft = position.X - shape.VisualWidth();
                     newTop = position.Y;
                     break;
                 case Anchor.BottomLeft:
                     newLeft = position.X;
-                    newTop = position.Y - shape.Height();
+                    newTop = position.Y - shape.VisualHeight();
                     break;
                 case Anchor.BottomRight:
-                    newLeft = position.X - shape.Width();
-                    newTop = position.Y - shape.Height();
+                    newLeft = position.X - shape.VisualWidth();
+                    newTop = position.Y - shape.VisualHeight();
                     break;
                 case Anchor.Center:
-                    newLeft = position.X - shape.Width() / 2;
-                    newTop = position.Y - shape.Height() / 2;
+                    newLeft = position.X - shape.VisualWidth() / 2;
+                    newTop = position.Y - shape.VisualHeight() / 2;
                     break;
                 default:
                     throw new ArgumentException("Invalid anchor point", nameof(anchor));
             }
 
-            shape.SetLeft(newLeft);
-            shape.SetTop(newTop);
+            shape.SetVisualLeft(newLeft);
+            shape.SetVisualTop(newTop);
         }
 
         public static PowerPoint.Shape FindNearestShape(this PowerPoint.Shape shape, List<PowerPoint.Shape> shapes, Anchor anchor)
@@ -366,7 +387,7 @@ namespace EdoliAddIn
             {
                 return null;
             }
-            return shapes.MaxBy(shape => shape.Right());
+            return shapes.MaxBy(shape => shape.VisualRight());
         }
 
         public static PowerPoint.Shape GetTopMostShape(List<PowerPoint.Shape> shapes)
@@ -384,20 +405,20 @@ namespace EdoliAddIn
             {
                 return null;
             }
-            return shapes.MaxBy(shape => shape.Bottom());
+            return shapes.MaxBy(shape => shape.VisualBottom());
         }
 
         public static Anchor GetRelativePos(this PowerPoint.Shape shape, PowerPoint.Shape other, float epsilon=0)
         {
-            float left1 = shape.Left();
-            float top1 = shape.Top();
-            float right1 = shape.Right();
-            float bottom1 = shape.Bottom();
+            float left1 = shape.VisualLeft();
+            float top1 = shape.VisualTop();
+            float right1 = shape.VisualRight();
+            float bottom1 = shape.VisualBottom();
 
-            float left2 = other.Left();
-            float top2 = other.Top();
-            float right2 = other.Right();
-            float bottom2 = other.Bottom();
+            float left2 = other.VisualLeft();
+            float top2 = other.VisualTop();
+            float right2 = other.VisualRight();
+            float bottom2 = other.VisualBottom();
 
             if (right2 < left1 - epsilon && bottom2 < top1 - epsilon)
             {

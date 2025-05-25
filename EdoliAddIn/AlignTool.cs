@@ -23,11 +23,11 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tLeft = lastShape.Left();
+                float tLeft = lastShape.VisualLeft();
 
                 foreach (var shape in shapes)
                 {
-                    shape.SetLeft(tLeft);
+                    shape.SetVisualLeft(tLeft);
                 }
             }
         }
@@ -39,11 +39,11 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tRight = lastShape.Right();
+                float tRight = lastShape.VisualRight();
 
                 foreach (var shape in shapes)
                 {
-                    shape.SetRight(tRight);
+                    shape.SetVisualRight(tRight);
                 }
             }
         }
@@ -55,11 +55,11 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tTop = lastShape.Top();
+                float tTop = lastShape.VisualTop();
 
                 foreach (var shape in shapes)
                 {
-                    shape.SetTop(tTop);
+                    shape.SetVisualTop(tTop);
                 }
             }
         }
@@ -71,11 +71,11 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tBottom = lastShape.Bottom();
+                float tBottom = lastShape.VisualBottom();
 
                 foreach (var shape in shapes)
                 {
-                    shape.SetBottom(tBottom);
+                    shape.SetVisualBottom(tBottom);
                 }
             }
         }
@@ -88,12 +88,12 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tLeft = lastShape.Left();
+                float tLeft = lastShape.VisualLeft();
 
                 for (int i = 0; i < shapes.Count - 1; i++)
                 {
                     var shape = shapes[i];
-                    shape.SetRight(tLeft);
+                    shape.SetVisualRight(tLeft);
                 }
             }
         }
@@ -105,12 +105,12 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tRight = lastShape.Right();
+                float tRight = lastShape.VisualRight();
 
                 for (int i = 0; i < shapes.Count - 1; i++)
                 {
                     var shape = shapes[i];
-                    shape.SetLeft(tRight);
+                    shape.SetVisualLeft(tRight);
                 }
             }
         }
@@ -122,12 +122,12 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tTop = lastShape.Top();
+                float tTop = lastShape.VisualTop();
 
                 for (int i = 0; i < shapes.Count - 1; i++)
                 {
                     var shape = shapes[i];
-                    shape.SetBottom(tTop);
+                    shape.SetVisualBottom(tTop);
                 }
             }
         }
@@ -139,12 +139,12 @@ namespace EdoliAddIn
             if (shapes.Count > 1)
             {
                 var lastShape = shapes.Last();
-                float tBottom = lastShape.Bottom();
+                float tBottom = lastShape.VisualBottom();
 
                 for (int i = 0; i < shapes.Count - 1; i++)
                 {
                     var shape = shapes[i];
-                    shape.SetTop(tBottom);
+                    shape.SetVisualTop(tBottom);
                 }
             }
         }
@@ -271,20 +271,20 @@ namespace EdoliAddIn
                 switch (anchor)
                 {
                     case Anchor.Top:
-                        textbox.SetLeft(nearestImage.Left() + nearestImage.Width() / 2 - textbox.Width() / 2);
-                        textbox.SetBottom(nearestImage.Top());
+                        textbox.SetVisualLeft(nearestImage.VisualLeft() + nearestImage.VisualWidth() / 2 - textbox.VisualWidth() / 2);
+                        textbox.SetVisualBottom(nearestImage.VisualTop());
                         break;
                     case Anchor.Bottom:
-                        textbox.SetLeft(nearestImage.Left() + nearestImage.Width() / 2 - textbox.Width() / 2);
-                        textbox.SetTop(nearestImage.Bottom());
+                        textbox.SetVisualLeft(nearestImage.VisualLeft() + nearestImage.VisualWidth() / 2 - textbox.VisualWidth() / 2);
+                        textbox.SetVisualTop(nearestImage.VisualBottom());
                         break;
                     case Anchor.Left:
-                        textbox.SetRight(nearestImage.Left());
-                        textbox.SetTop(nearestImage.Top() + nearestImage.Height() / 2 - textbox.Height() / 2);
+                        textbox.SetVisualRight(nearestImage.VisualLeft());
+                        textbox.SetVisualTop(nearestImage.VisualTop() + nearestImage.VisualHeight() / 2 - textbox.VisualHeight() / 2);
                         break;
                     case Anchor.Right:
-                        textbox.SetLeft(nearestImage.Right());
-                        textbox.SetTop(nearestImage.Top() + nearestImage.Height() / 2 - textbox.Height() / 2);
+                        textbox.SetVisualLeft(nearestImage.VisualRight());
+                        textbox.SetVisualTop(nearestImage.VisualTop() + nearestImage.VisualHeight() / 2 - textbox.VisualHeight() / 2);
                         break;
                 }
             }
@@ -302,15 +302,15 @@ namespace EdoliAddIn
                 var leftMostShape = ShapeExt.GetLeftMostShape(shapes);
                 var rightMostShape = ShapeExt.GetRightMostShape(shapes);
 
-                var left = leftMostShape.Left() + leftMostShape.Width() / 2;
-                var right = rightMostShape.Left() + rightMostShape.Width() / 2;
+                var left = leftMostShape.VisualLeft() + leftMostShape.VisualWidth() / 2;
+                var right = rightMostShape.VisualLeft() + rightMostShape.VisualWidth() / 2;
 
                 float interval = (right - left) / (shapes.Count - 1);
                 float culLeft = left + interval;
                 for (int i = 1; i < shapes.Count - 1; i++)
                 {
                     var shape = shapes[i];
-                    shape.SetLeft(culLeft - shape.Width() / 2);
+                    shape.SetVisualLeft(culLeft - shape.VisualWidth() / 2);
 
                     culLeft += interval;
                 }
@@ -330,15 +330,15 @@ namespace EdoliAddIn
                 var topMostShape = ShapeExt.GetTopMostShape(shapes);
                 var bottomMostShape = ShapeExt.GetBottomMostShape(shapes);
 
-                var top = topMostShape.Top() + topMostShape.Height() / 2;
-                var bottom = bottomMostShape.Top() + bottomMostShape.Height() / 2;
+                var top = topMostShape.VisualTop() + topMostShape.VisualHeight() / 2;
+                var bottom = bottomMostShape.VisualTop() + bottomMostShape.VisualHeight() / 2;
 
                 float interval = (bottom - top) / (shapes.Count - 1);
                 float culTop = top + interval;
                 for (int i = 1; i < shapes.Count - 1; i++)
                 {
                     var shape = shapes[i];
-                    shape.SetTop(culTop - shape.Height() / 2);
+                    shape.SetVisualTop(culTop - shape.VisualHeight() / 2);
 
                     culTop += interval;
                 }
@@ -391,22 +391,22 @@ namespace EdoliAddIn
 
             var shapes = Util.ListSelectedShapes();
 
-            var minLeft = shapes.Min(shape => shape.Left());
-            var maxLeft = shapes.Max(shape => shape.Left());
+            var minLeft = shapes.Min(shape => shape.VisualLeft());
+            var maxLeft = shapes.Max(shape => shape.VisualLeft());
 
-            var minTop = shapes.Min(shape => shape.Top());
-            var maxTop = shapes.Max(shape => shape.Top());
+            var minTop = shapes.Min(shape => shape.VisualTop());
+            var maxTop = shapes.Max(shape => shape.VisualTop());
 
             var diag = new Vector2(maxLeft - minLeft, maxTop - minTop);
 
             foreach (var shape in shapes)
             {
-                float x = shape.Left() - minLeft;
-                float y = shape.Top() - minTop;
+                float x = shape.VisualLeft() - minLeft;
+                float y = shape.VisualTop() - minTop;
                 float newX = y * diag.X / diag.Y;
                 float newY = x * diag.Y / diag.X;
-                shape.SetLeft(newX + minLeft);
-                shape.SetTop(newY + minTop);
+                shape.SetVisualLeft(newX + minLeft);
+                shape.SetVisualTop(newY + minTop);
             }
         }
 
@@ -434,7 +434,7 @@ namespace EdoliAddIn
             }
 
             float left = 0;
-            float top = shapes[0].Top();
+            float top = shapes[0].VisualTop();
             float maxHeight = 0;
 
             for (int i = 0; i < shapes.Count(); i++)
@@ -445,18 +445,18 @@ namespace EdoliAddIn
 
                 if (col == 0)
                 {
-                    left = shapes[0].Left();
+                    left = shapes[0].VisualLeft();
                     if (row >= 1)
                     {
                         top += maxHeight + padding;
                     }
                     maxHeight = 0;
                 }
-                shape.SetLeft(left);
-                shape.SetTop(top);
+                shape.SetVisualLeft(left);
+                shape.SetVisualTop(top);
 
-                left += shapes[col].Width() + padding;
-                var height = shape.Height();
+                left += shapes[col].VisualWidth() + padding;
+                var height = shape.VisualHeight();
                 if (height > maxHeight)
                 {
                     maxHeight = height;
@@ -498,10 +498,10 @@ namespace EdoliAddIn
             foreach (var shape in shapes)
             {
                 var matchedShape = shape.FindNearestShape(prevShapes, Anchor.Center);
-                shape.SetLeft(matchedShape.Left());
-                shape.SetTop(matchedShape.Top());
+                shape.SetVisualLeft(matchedShape.VisualLeft());
+                shape.SetVisualTop(matchedShape.VisualTop());
 
-                shape.SetSize(matchedShape.Width(), shape.Height() * matchedShape.Width() / shape.Width());
+                shape.SetVisualSize(matchedShape.VisualWidth(), shape.VisualHeight() * matchedShape.VisualWidth() / shape.VisualWidth());
             }
         }
 
@@ -515,17 +515,17 @@ namespace EdoliAddIn
                 return;
             }
 
-            float firstLeft = shapes[0].Left();
-            float firstTop = shapes[0].Top();
+            float firstLeft = shapes[0].VisualLeft();
+            float firstTop = shapes[0].VisualTop();
 
             for (int i = 0; i < shapes.Count - 1; i++)
             {
-                shapes[i].SetLeft(shapes[i + 1].Left());
-                shapes[i].SetTop(shapes[i + 1].Top());
+                shapes[i].SetVisualLeft(shapes[i + 1].VisualLeft());
+                shapes[i].SetVisualTop(shapes[i + 1].VisualTop());
             }
 
-            shapes.Last().SetLeft(firstLeft);
-            shapes.Last().SetTop(firstTop);
+            shapes.Last().SetVisualLeft(firstLeft);
+            shapes.Last().SetVisualTop(firstTop);
         }
 
         public static void SwapCycleReverse()
@@ -538,16 +538,16 @@ namespace EdoliAddIn
                 return;
             }
 
-            float lastLeft = shapes.Last().Left();
-            float lastTop = shapes.Last().Top();
+            float lastLeft = shapes.Last().VisualLeft();
+            float lastTop = shapes.Last().VisualTop();
 
             for (int i = shapes.Count - 1; i > 0; i--)
             {
-                shapes[i].SetLeft(shapes[i - 1].Left());
-                shapes[i].SetTop(shapes[i - 1].Top());
+                shapes[i].SetVisualLeft(shapes[i - 1].VisualLeft());
+                shapes[i].SetVisualTop(shapes[i - 1].VisualTop());
             }
-            shapes[0].SetLeft(lastLeft);
-            shapes[0].SetTop(lastTop);
+            shapes[0].SetVisualLeft(lastLeft);
+            shapes[0].SetVisualTop(lastTop);
         }
 
         public static void SnapDownRight()
@@ -557,17 +557,17 @@ namespace EdoliAddIn
             var shapes = Util.ListSelectedShapes();
 
             var firstShape = shapes[0];
-            var left = firstShape.Right();
-            var top = firstShape.Bottom();
+            var left = firstShape.VisualRight();
+            var top = firstShape.VisualBottom();
 
             for (int i = 1; i < shapes.Count; i++)
             {
                 var shape = shapes[i];
-                shape.SetLeft(left);
-                shape.SetTop(top);
+                shape.SetVisualLeft(left);
+                shape.SetVisualTop(top);
 
-                top += shape.Height();
-                left += shape.Width();
+                top += shape.VisualHeight();
+                left += shape.VisualWidth();
             }
 
         }
@@ -579,16 +579,16 @@ namespace EdoliAddIn
             var shapes = Util.ListSelectedShapes();
 
             var firstShape = shapes[0];
-            var left = firstShape.Right();
-            var top = firstShape.Top();
+            var left = firstShape.VisualRight();
+            var top = firstShape.VisualTop();
 
             for (int i = 1; i < shapes.Count; i++)
             {
                 var shape = shapes[i];
-                top -= shape.Height();
-                shape.SetLeft(left);
-                shape.SetTop(top);
-                left += shape.Width();
+                top -= shape.VisualHeight();
+                shape.SetVisualLeft(left);
+                shape.SetVisualTop(top);
+                left += shape.VisualWidth();
             }
         }
 

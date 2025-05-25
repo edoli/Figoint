@@ -274,13 +274,13 @@ namespace EdoliAddIn
 
                 float left1 = shape1.Left;
                 float top1 = shape1.Top;
-                float right1 = shape1.Right();
-                float bottom1 = shape1.Bottom();
+                float right1 = shape1.VisualRight();
+                float bottom1 = shape1.VisualBottom();
 
                 float left2 = shape2.Left;
                 float top2 = shape2.Top;
-                float right2 = shape2.Right();
-                float bottom2 = shape2.Bottom();
+                float right2 = shape2.VisualRight();
+                float bottom2 = shape2.VisualBottom();
 
                 if (rel == ShapeExt.Anchor.TopLeft || rel == ShapeExt.Anchor.BottomRight)
                 {
