@@ -50,10 +50,10 @@ namespace EdoliAddIn
 
     public static class ShapeTool
     {
-        public readonly static double InchToPt = 720;
-        public readonly static double InchToMm = 25.4;
-        public readonly static double MmToPt = InchToPt / InchToMm;
-        public readonly static double PtToMm = InchToMm / InchToPt;
+        public const double InchToPt = 720;
+        public const double InchToMm = 25.4;
+        public const double MmToPt = InchToPt / InchToMm;
+        public const double PtToMm = InchToMm / InchToPt;
 
         // Shape Tag안에 정보들을 저장하기 위한 Tag Name.
         // Shape 상속및 확장이 불가능하기 때문에 Tag를 활용해서 정보를 저장함

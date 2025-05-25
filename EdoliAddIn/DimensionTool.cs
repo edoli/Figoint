@@ -12,9 +12,9 @@ namespace EdoliAddIn
     public static class DimensionTool
     {
 
-        private const float shapeScaleDefault = 28.3465f;
+        private const double PtToMmDefault = ShapeTool.PtToMm;
+        private static double PtToMm = PtToMmDefault;
 
-        private static float shapeScale = shapeScaleDefault;
 
         private static Dictionary<PowerPoint.Shape, PowerPoint.Shape> dimensionTextboxes = new Dictionary<PowerPoint.Shape, PowerPoint.Shape>();
 
@@ -255,9 +255,9 @@ namespace EdoliAddIn
                     float pixelDistance = Vector2.Distance(start, end);
 
                     // pixels / shapeScale = cm
-                    float actualDistance = pixelDistance / shapeScale;
+                    float actualDistance = (float) (pixelDistance * PtToMm);
 
-                    string distanceText = Math.Round(actualDistance * 10, 2).ToString() + " mm";
+                    string distanceText = Math.Round(actualDistance, 2).ToString() + " mm";
 
                     Vector2 midPoint = (start + end) / 2;
                     Vector2 lineVector = end - start;
@@ -334,15 +334,16 @@ namespace EdoliAddIn
 
                     switch (unit.ToLower())
                     {
-                        case "km": value *= 1e+5f; break;
-                        case "m": value *= 1e+2f; break;
-                        case "mm": value *= 1e-1f; break;
-                        case "um": value *= 1e-4f; break;
-                        case "nm": value *= 1e-7f; break;
+                        case "km": value *= 1e+6f; break;
+                        case "m": value *= 1e+3f; break;
+                        case "cm": value *= 1e+1f; break;
+                        case "mm": break;
+                        case "um": value *= 1e-3f; break;
+                        case "nm": value *= 1e-6f; break;
                     }
 
-                    // shapeScale 계산: 픽셀 / cm
-                    shapeScale = pixelLength / value;
+                    // PtToMm 계산: cm / 픽셀
+                    PtToMm = value / pixelLength;
                 }
                 else
                 {

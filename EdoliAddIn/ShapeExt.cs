@@ -572,12 +572,25 @@ namespace EdoliAddIn
 
             RectangleF rect = shape.VisualRect();
 
+            PowerPoint.Shape beginConnectedShape = null;
+            PowerPoint.Shape endConnectedShape = null;
+            int beginConnectionSite = 0;
+            int endConnectionSite = 0;
+            if (shape.ConnectorFormat.BeginConnected == MsoTriState.msoTrue)
+            {
+                beginConnectedShape = shape.ConnectorFormat.BeginConnectedShape;
+                beginConnectionSite = shape.ConnectorFormat.BeginConnectionSite;
+            }
+            if (shape.ConnectorFormat.EndConnected == MsoTriState.msoTrue)
+            {
+                endConnectedShape = shape.ConnectorFormat.EndConnectedShape;
+                endConnectionSite = shape.ConnectorFormat.EndConnectionSite;
+            }
+
             shape.ConnectorFormat.BeginConnect(line, 1);
 
             var right = shape.Left + shape.Width;
             var bottom = shape.Top + shape.Height;
-
-            shape.ConnectorFormat.BeginDisconnect();
 
             shape.Left = rect.Left;
             shape.Top = rect.Top;
@@ -619,6 +632,21 @@ namespace EdoliAddIn
             else
             {
                 throw new Exception("Connector check failed in GetLineEndPoints");
+            }
+
+            if (beginConnectedShape != null)
+            {
+                shape.ConnectorFormat.BeginConnect(beginConnectedShape, beginConnectionSite);
+            }
+            else
+            {
+                shape.ConnectorFormat.BeginDisconnect();
+            }
+
+
+            if (endConnectedShape != null)
+            {
+                shape.ConnectorFormat.EndConnect(endConnectedShape, endConnectionSite);
             }
 
             line.Delete();
