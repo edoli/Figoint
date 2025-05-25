@@ -99,5 +99,20 @@ namespace EdoliAddIn
 
             return angleDegrees;
         }
+
+        public static bool Approximately(this float a, float b, float epsilon = 1e-4f)
+        {
+            return Math.Abs(a - b) < epsilon;
+        }
+
+        public static bool Approximately(this double a, double b, double epsilon = 1e-4)
+        {
+            return Math.Abs(a - b) < epsilon;
+        }
+
+        public static bool Approximately(this decimal a, decimal b, decimal epsilon = 1e-4m)
+        {
+            return Math.Abs(a - b) < epsilon;
+        }
     }
 }
