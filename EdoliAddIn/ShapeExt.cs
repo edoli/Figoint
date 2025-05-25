@@ -538,7 +538,7 @@ namespace EdoliAddIn
 
         public static Vector2[] GetConnectors(this PowerPoint.Shape shape, int[] indices = null)
         {
-            PowerPoint.Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+            Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
 
             var connectors = new List<Vector2>();
 
@@ -556,6 +556,74 @@ namespace EdoliAddIn
             line.Delete();
 
             return connectors.ToArray();
+        }
+
+        public static Vector2[] GetLineEndPoints(this PowerPoint.Shape shape)
+        {
+            // TODO: line에 rotation이 있는 경우가 있음. 이런 경우 제대로 작동하지 않음
+
+            if (shape.Connector != MsoTriState.msoTrue) {
+                throw new Exception("Shape is not a connector");
+            }
+
+            Slide slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide;
+
+            var line = slide.Shapes.AddLine(-100, -100, -101, -101);
+
+            RectangleF rect = shape.VisualRect();
+
+            shape.ConnectorFormat.BeginConnect(line, 1);
+
+            var right = shape.Left + shape.Width;
+            var bottom = shape.Top + shape.Height;
+
+            shape.ConnectorFormat.BeginDisconnect();
+
+            shape.Left = rect.Left;
+            shape.Top = rect.Top;
+            shape.Width = rect.Width;
+            shape.Height = rect.Height;
+
+            Vector2[] points = new Vector2[2];
+
+            float epsilon = 1e-3f;
+
+            if (right.Approximately(rect.Right, epsilon) && bottom.Approximately(rect.Bottom, epsilon))
+            {
+                // ↘
+                points[0] = new Vector2(rect.Left, rect.Top);
+                points[1] = new Vector2(rect.Right, rect.Bottom);
+            }
+            else if (right.Approximately(rect.Left, epsilon) && bottom.Approximately(rect.Top, epsilon))
+            {
+                // ↖
+                shape.Flip(MsoFlipCmd.msoFlipVertical);
+                shape.Flip(MsoFlipCmd.msoFlipHorizontal);
+                points[0] = new Vector2(rect.Right, rect.Bottom);
+                points[1] = new Vector2(rect.Left, rect.Top);
+            }
+            else if (right.Approximately(rect.Right, epsilon) && bottom.Approximately(rect.Top, epsilon))
+            {
+                // ↗
+                shape.Flip(MsoFlipCmd.msoFlipVertical);
+                points[0] = new Vector2(rect.Left, rect.Bottom);
+                points[1] = new Vector2(rect.Right, rect.Top);
+            }
+            else if (right.Approximately(rect.Left, epsilon) && bottom.Approximately(rect.Bottom, epsilon))
+            {
+                // ↙
+                shape.Flip(MsoFlipCmd.msoFlipHorizontal);
+                points[0] = new Vector2(rect.Right, rect.Top);
+                points[1] = new Vector2(rect.Left, rect.Bottom);
+            }
+            else
+            {
+                throw new Exception("Connector check failed in GetLineEndPoints");
+            }
+
+            line.Delete();
+
+            return points;
         }
 
         /// <summary>
@@ -578,11 +646,11 @@ namespace EdoliAddIn
                     case MsoAutoShapeType.msoShapeRectangle:
                         return new Vector2[]
                         {
-                        shape.PositionRot(Anchor.TopLeft),
-                        shape.PositionRot(Anchor.TopRight),
-                        shape.PositionRot(Anchor.BottomRight),
-                        shape.PositionRot(Anchor.BottomLeft),
-                        shape.PositionRot(Anchor.TopLeft)
+                        shape.VertexPosition(Anchor.TopLeft),
+                        shape.VertexPosition(Anchor.TopRight),
+                        shape.VertexPosition(Anchor.BottomRight),
+                        shape.VertexPosition(Anchor.BottomLeft),
+                        shape.VertexPosition(Anchor.TopLeft)
                         };
                     case MsoAutoShapeType.msoShapeIsoscelesTriangle:
                     case MsoAutoShapeType.msoShapeRightTriangle:
@@ -593,6 +661,11 @@ namespace EdoliAddIn
                         return shape.GetConnectors(new int[] { 1, 2, 3, 5, 6 });
                     case MsoAutoShapeType.msoShapeHexagon:
                         return shape.GetConnectors().ClosePolygon();
+                }
+
+                if (shape.Connector == MsoTriState.msoTrue)
+                {
+                    return shape.GetLineEndPoints();
                 }
             }
             return new Vector2[0];
