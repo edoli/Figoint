@@ -20,6 +20,10 @@ namespace EdoliAddIn
         public static RibbonEditBox nodeCount;
         public static RibbonEditBox node1;
         public static RibbonEditBox node2;
+        public static RibbonEditBox rotation;
+        public static RibbonEditBox bound;
+        public static RibbonEditBox length;
+        public static RibbonEditBox lengthMM;
         public static void OnStart()
         {
             AddButton("ShowConnectors", ShowConnectors);
@@ -31,19 +35,28 @@ namespace EdoliAddIn
             nodeCount = AddField("NodeCount");
             node1 = AddField("Node1");
             node2 = AddField("Node2");
+            rotation = AddField("Rotation");
+            bound = AddField("Bound");
+            length = AddField("Length_pt");
+            lengthMM = AddField("Length_mm");
         }
 
-        public static void OnAfterShapeSizeChange()
+        public static void OnAfterShapeSizeChange(PowerPoint.Shape shape)
         {
-            // try {
-            //     Globals.Ribbons.EdoliRibbon.animationName.Text = shape.ConnectorFormat.BeginConnectionSite.ToString();
-            //     Globals.Ribbons.EdoliRibbon.animationName.Text = shape.ConnectorFormat.EndConnectionSite.ToString();
-            // } catch {
+            Update();
+        }
 
-            // }
+        public static void OnAfterDragDropOnSlide(PowerPoint.Slide slide, float x, float y)
+        {
+            Update();
         }
 
         public static void OnWindowSelectionChange()
+        {
+            Update();
+        }
+
+        public static void Update()
         {
             var shapes = Util.ListSelectedShapes();
             if (shapes.Count > 0)
@@ -57,6 +70,15 @@ namespace EdoliAddIn
                 nodeCount.Text = nodes.Count.ToString();
                 node1.Text = nodes.Count > 0 ? NodeToString(nodes[1]) : "";
                 node2.Text = nodes.Count > 1 ? NodeToString(nodes[nodes.Count]) : "";
+                rotation.Text = shape.Rotation.ToString();
+                bound.Text = shape.Rect().ToString();
+                var vertices = shape.GetVertices();
+                if (vertices.Length > 2)
+                {
+                    var distance = Vector2.Distance(vertices[0], vertices[1]);
+                    length.Text = distance.ToString();
+                    lengthMM.Text = (distance * ShapeTool.PtToMm).ToString();
+                }
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Interop.PowerPoint;
 
@@ -13,9 +13,17 @@ namespace EdoliAddIn
         public void AfterShapeSizeChange(PowerPoint.Shape shape)
         {
 #if DEBUG
-            DebugTool.OnAfterShapeSizeChange();
+            DebugTool.OnAfterShapeSizeChange(shape);
 #endif
         }
+
+        public void AfterDragDropOnSlide(PowerPoint.Slide slide, float x, float y)
+        {
+#if DEBUG
+            DebugTool.OnAfterDragDropOnSlide(slide, x, y);
+#endif
+        }
+
 
         public void WindowSelectionChange(Selection sel)
         {
@@ -53,6 +61,7 @@ namespace EdoliAddIn
             KeyboardHook.SetHook();
             this.Application.WindowSelectionChange += new PowerPoint.EApplication_WindowSelectionChangeEventHandler(WindowSelectionChange);
             this.Application.AfterShapeSizeChange += new PowerPoint.EApplication_AfterShapeSizeChangeEventHandler(AfterShapeSizeChange);
+            this.Application.AfterDragDropOnSlide += new PowerPoint.EApplication_AfterDragDropOnSlideEventHandler(AfterDragDropOnSlide);
 
 #if DEBUG
             DebugTool.OnStart();
