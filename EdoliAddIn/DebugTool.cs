@@ -68,32 +68,38 @@ namespace EdoliAddIn
                 autoTypeField.Text = shape.AutoShapeType.ToString();
                 var nodes = shape.Nodes;
                 nodeCount.Text = nodes.Count.ToString();
-                node1.Text = nodes.Count > 0 ? NodeToString(nodes[1]) : "";
-                node2.Text = nodes.Count > 1 ? NodeToString(nodes[nodes.Count]) : "";
-                rotation.Text = shape.Rotation.ToString();
+                if (shape.Type == MsoShapeType.msoFreeform)
+                {
+                    node1.Text = nodes.Count > 0 ? NodeToString(nodes[1]) : "";
+                    node2.Text = nodes.Count > 1 ? NodeToString(nodes[nodes.Count]) : "";
+                }
+                else
+                {
+                    node1.Text = "";
+                    node2.Text = "";
+                }
+                    rotation.Text = shape.Rotation.ToString();
                 bound.Text = shape.Rect().ToString();
                 var vertices = shape.GetVertices();
-                if (vertices.Length > 2)
+                if (vertices.Length >= 2)
                 {
                     var distance = Vector2.Distance(vertices[0], vertices[1]);
                     length.Text = distance.ToString();
                     lengthMM.Text = (distance * ShapeTool.PtToMm).ToString();
+                }
+                else
+                {
+                    length.Text = "";
+                    lengthMM.Text = "";
                 }
             }
         }
 
         public static string NodeToString(PowerPoint.ShapeNode node)
         {
-            try
-            {
-                float x = node.Points[1, 1];
-                float y = node.Points[1, 2];
-                return $"{x}, {y}";
-            }
-            catch (System.Runtime.InteropServices.COMException ex) when (ex.HResult == unchecked((int)0x800A01A8))
-            {
-                return "Unknown";
-            }
+            float x = node.Points[1, 1];
+            float y = node.Points[1, 2];
+            return $"{x}, {y}";
         }
 
         public static void CheckDebugGroup()
