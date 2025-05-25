@@ -1,6 +1,7 @@
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
@@ -14,6 +15,13 @@ namespace EdoliAddIn
         private const float shapeScaleDefault = 28.3465f;
 
         private static float shapeScale = shapeScaleDefault;
+
+        private static Dictionary<PowerPoint.Shape, PowerPoint.Shape> dimensionTextboxes = new Dictionary<PowerPoint.Shape, PowerPoint.Shape>();
+
+        public static void OnAfterShapeSizeChange()
+        {
+
+        }
 
         private static PowerPoint.Shape AddDimensionTextbox(Slide slide, float x, float y, String text)
         {
@@ -298,7 +306,7 @@ namespace EdoliAddIn
 
                 foreach (var shape in shapes)
                 {
-                    if (shape.Type == MsoShapeType.msoLine)
+                    if (shape.Type == MsoShapeType.msoLine || shape.Connector == MsoTriState.msoTrue)
                     {
                         lineShape = shape;
                     }
