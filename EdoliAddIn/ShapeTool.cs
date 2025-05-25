@@ -50,8 +50,10 @@ namespace EdoliAddIn
 
     public static class ShapeTool
     {
-
-        private static float shapeScale = 28.3465f;
+        public readonly static double InchToPt = 720;
+        public readonly static double InchToMm = 25.4;
+        public readonly static double MmToPt = InchToPt / InchToMm;
+        public readonly static double PtToMm = InchToMm / InchToPt;
 
         // Shape Tag안에 정보들을 저장하기 위한 Tag Name.
         // Shape 상속및 확장이 불가능하기 때문에 Tag를 활용해서 정보를 저장함
@@ -549,7 +551,7 @@ namespace EdoliAddIn
             for (int t = 0; t < numPoints; t++)
             {
                 var f = ((float)t) / (numPoints - 1);
-                initVectors[t] = func(startValue + f * rangeValue) * shapeScale;
+                initVectors[t] = func(startValue + f * rangeValue) * (float) MmToPt;
             }
             
             Vector2[] vectors;
