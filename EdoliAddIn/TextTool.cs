@@ -24,23 +24,60 @@ namespace EdoliAddIn
         {
             Globals.ThisAddIn.Application.StartNewUndoEntry();
             ReplaceSelectedText(s => {
-                var lines = s.Split(new[] { '\n', '\r' }, StringSplitOptions.None);
-                return string.Join("\n", lines.Select(line =>
+                if (string.IsNullOrEmpty(s)) return s;
+
+                // Split while keeping separators (CRLF, CR, LF)
+                var parts = System.Text.RegularExpressions.Regex.Split(s, "(\\r\\n|\\r|\\n)");
+                var sb = new System.Text.StringBuilder();
+
+                for (int i = 0; i < parts.Length; i += 2)
                 {
+                    var line = parts[i];
+                    var separator = (i + 1 < parts.Length) ? parts[i + 1] : string.Empty;
+
                     var trimmedLine = line.Trim();
+                    string processed;
+
                     if (trimmedLine.EndsWith("="))
                     {
-                        // if line ends with '=', add result of expression after '='
-                        // e.g. "1+2=" => "1+2=3"
-                        return line + new Expression(trimmedLine.Substring(0, trimmedLine.Length - 1), ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                        try
+                        {
+                            // if line ends with '=', add result of expression after '='
+                            // e.g. "1+2=" => "1+2=3"
+                            var expr = trimmedLine.Substring(0, trimmedLine.Length - 1);
+                            var value = new Expression(expr, ExpressiveOptions.IgnoreCaseForParsing).Evaluate();
+                            processed = line + (value?.ToString() ?? string.Empty);
+                        }
+                        catch
+                        {
+                            processed = line; // if evaluation fails, return original line
+                        }
                     }
                     else
                     {
-                        // if line does not end with '=', replace line with result
-                        // e.g. "1+2" => "3"
-                        return new Expression(trimmedLine, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                        try
+                        {
+                            // if line does not end with '=', replace line with result
+                            // e.g. "1+2" => "3"
+                            processed = new Expression(trimmedLine, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
+                        }
+                        catch
+                        {
+                            processed = line; // if evaluation fails, return original line
+                        }
                     }
-                }));
+                    sb.Append(processed);
+                    if (!string.IsNullOrEmpty(separator))
+                    {
+                        sb.Append(separator);
+                    }
+                }
+                if (sb[sb.Length - 1] == '\n' || sb[sb.Length - 1] == '\r')
+                {
+                    sb.Remove(sb.Length - 1, 1);
+                }
+
+                return sb.ToString();
             });
         }
 
