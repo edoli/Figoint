@@ -371,6 +371,7 @@ FodyWeavers.xsd
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
+!.vscode/powerpoint-addin.ps1
 !.vscode/extensions.json
 *.code-workspace
 

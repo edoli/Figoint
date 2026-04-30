@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PowerPoint Add-in (Debug)",
+            "type": "clr",
+            "request": "launch",
+            "program": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Prepare PowerPoint Add-in (Debug)",
+            "stopAtEntry": false,
+            "justMyCode": true
+        },
+        {
+            "name": "PowerPoint Add-in (Release)",
+            "type": "clr",
+            "request": "launch",
+            "program": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Prepare PowerPoint Add-in (Release)",
+            "stopAtEntry": false,
+            "justMyCode": true
+        }
+    ]
+}
