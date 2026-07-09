@@ -20,7 +20,7 @@ jobs:
       uses: NuGet/setup-nuget@v2.0.0
 
     - name: Restore NuGet packages
-      run: nuget restore ${{github.workspace}}\EdoliAddIn.sln
+      run: nuget restore ${{github.workspace}}\Figoint.sln
 
     - name: Import certificate from the command-line
       shell: pwsh
@@ -33,11 +33,11 @@ jobs:
       run: cmd.exe /C CALL "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
 
     - name: Build VSTO
-      run: msbuild ${{github.workspace}}\EdoliAddIn.sln -t:rebuild /p:Platform="Any CPU" /p:Configuration="Release" /nologo /nr:false /p:VisualStudioVersion="17.0"
+      run: msbuild ${{github.workspace}}\Figoint.sln -t:rebuild /p:Platform="Any CPU" /p:Configuration="Release" /nologo /nr:false /p:VisualStudioVersion="17.0"
 
 
     - name: Create ZIP file
-      run: Compress-Archive -Path EdoliAddIn\bin\Release\* -DestinationPath release.zip
+      run: Compress-Archive -Path Figoint\bin\Release\* -DestinationPath release.zip
 
     - name: Create Release
       id: create_release
@@ -57,5 +57,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./release.zip
-        asset_name: EdoliAddIn_${{ github.ref_name }}.zip
+        asset_name: Figoint_${{ github.ref_name }}.zip
         asset_content_type: application/zip

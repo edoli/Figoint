@@ -1,7 +1,7 @@
 
 <img src="./logo.png" width="160" alt="logo">
 
-# EdoliAddIn
+# Figoint
 
 ## Table of Contents
 1. [Shape](#shape)
@@ -13,81 +13,81 @@
 
 Toggle line arrow
 
-![icon_begin_arrow_toggle](./EdoliAddIn/Resources/icon_begin_arrow_toggle.png)
-![icon_end_arrow_toggle](./EdoliAddIn/Resources/icon_end_arrow_toggle.png)
+![icon_begin_arrow_toggle](./Figoint/Resources/icon_begin_arrow_toggle.png)
+![icon_end_arrow_toggle](./Figoint/Resources/icon_end_arrow_toggle.png)
 
 Size up arrow
 
-![icon_begin_arrow_size_up](./EdoliAddIn/Resources/icon_begin_arrow_size_up.png)
-![icon_end_arrow_size_up](./EdoliAddIn/Resources/icon_end_arrow_size_up.png)
+![icon_begin_arrow_size_up](./Figoint/Resources/icon_begin_arrow_size_up.png)
+![icon_end_arrow_size_up](./Figoint/Resources/icon_end_arrow_size_up.png)
 
 Size down arrow
 
-![icon_begin_arrow_size_down](./EdoliAddIn/Resources/icon_begin_arrow_size_down.png)
-![icon_end_arrow_size_down](./EdoliAddIn/Resources/icon_end_arrow_size_down.png)
+![icon_begin_arrow_size_down](./Figoint/Resources/icon_begin_arrow_size_down.png)
+![icon_end_arrow_size_down](./Figoint/Resources/icon_end_arrow_size_down.png)
 
 Connect shapes by lines
 
-![icon_connect_shape_by_lines](./EdoliAddIn/Resources/icon_connect_shape_by_lines.png)
+![icon_connect_shape_by_lines](./Figoint/Resources/icon_connect_shape_by_lines.png)
 
 Trim image
 
-![icon_image_trim](./EdoliAddIn/Resources/icon_image_trim.png)
+![icon_image_trim](./Figoint/Resources/icon_image_trim.png)
 
 
 ## Align
 
 Place labels on the bottom/left/right/top side of images
 
-![icon_label_bottom](./EdoliAddIn/Resources/icon_label_bottom.png)
-![icon_label_left](./EdoliAddIn/Resources/icon_label_left.png)
-![icon_label_right](./EdoliAddIn/Resources/icon_label_right.png)
-![icon_label_top](./EdoliAddIn/Resources/icon_label_top.png)
+![icon_label_bottom](./Figoint/Resources/icon_label_bottom.png)
+![icon_label_left](./Figoint/Resources/icon_label_left.png)
+![icon_label_right](./Figoint/Resources/icon_label_right.png)
+![icon_label_top](./Figoint/Resources/icon_label_top.png)
 
 Transpose shapes
 
-![icon_transpose](./EdoliAddIn/Resources/icon_transpose.png)
+![icon_transpose](./Figoint/Resources/icon_transpose.png)
 
 Group images and labels
 
-![icon_label_group](./EdoliAddIn/Resources/icon_label_group.png)
+![icon_label_group](./Figoint/Resources/icon_label_group.png)
 
 Align shapes with previous slide
 
-![icon_align_prev_slide](./EdoliAddIn/Resources/icon_align_prev_slide.png)
+![icon_align_prev_slide](./Figoint/Resources/icon_align_prev_slide.png)
 
 Align shapes with next slide
 
-![icon_align_next_slide](./EdoliAddIn/Resources/icon_align_next_slide.png)
+![icon_align_next_slide](./Figoint/Resources/icon_align_next_slide.png)
 
 Swap multiple shapes
 
-![icon_swap_cycle](./EdoliAddIn/Resources/icon_swap_cycle.png)
-![icon_swap_cycle_reverse](./EdoliAddIn/Resources/icon_swap_cycle_reverse.png)
+![icon_swap_cycle](./Figoint/Resources/icon_swap_cycle.png)
+![icon_swap_cycle_reverse](./Figoint/Resources/icon_swap_cycle_reverse.png)
 
 Align shapes in diagonal
 
-![icon_snap_diag_downright](./EdoliAddIn/Resources/icon_snap_diag_downright.png)
-![icon_snap_diag_upright](./EdoliAddIn/Resources/icon_snap_diag_upright.png)
+![icon_snap_diag_downright](./Figoint/Resources/icon_snap_diag_downright.png)
+![icon_snap_diag_upright](./Figoint/Resources/icon_snap_diag_upright.png)
 
 Align shapes in grid automatically
 
-![icon_align_grid](./EdoliAddIn/Resources/icon_align_grid.png)
+![icon_align_grid](./Figoint/Resources/icon_align_grid.png)
 
 Align shapes in grid with custom padding and column. Shapes are placed in row major order. The shapes are sorted in the selected order.
 
-![icon_grid](./EdoliAddIn/Resources/icon_grid.png)
+![icon_grid](./Figoint/Resources/icon_grid.png)
 
 
 ## Curve
 
 Create polyline of equation
 
-![icon_polyline_of_equation](./EdoliAddIn/Resources/icon_polyline_of_equation.png)
+![icon_polyline_of_equation](./Figoint/Resources/icon_polyline_of_equation.png)
 
 Create bezier curve of equation
 
-![icon_curve_of_equation](./EdoliAddIn/Resources/icon_curve_of_equation.png)
+![icon_curve_of_equation](./Figoint/Resources/icon_curve_of_equation.png)
 
 This addin uses [expressive](https://github.com/bijington/expressive) for parsing equation. Use parameter `[t]` for drawing curve. Also the range should be set for `[t]`. There are some examples
 

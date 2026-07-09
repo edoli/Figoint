@@ -12,9 +12,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $workspaceRoot = Split-Path -Path $PSScriptRoot -Parent
-$solutionPath = Join-Path $workspaceRoot "EdoliAddIn.sln"
-$projectRoot = Join-Path $workspaceRoot "EdoliAddIn"
-$registryPath = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\PowerPoint\Addins\EdoliAddIn"
+$solutionPath = Join-Path $workspaceRoot "Figoint.sln"
+$projectRoot = Join-Path $workspaceRoot "Figoint"
+$registryPath = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Office\PowerPoint\Addins\Figoint"
 
 function Get-MSBuildPath {
     $vswherePath = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
@@ -84,7 +84,7 @@ function Set-ManifestRegistration {
         [string]$BuildConfiguration
     )
 
-    $manifestPath = Join-Path $projectRoot "bin\$BuildConfiguration\EdoliAddIn.vsto"
+    $manifestPath = Join-Path $projectRoot "bin\$BuildConfiguration\Figoint.vsto"
     if (-not (Test-Path $manifestPath)) {
         throw "Manifest not found at '$manifestPath'."
     }
@@ -95,8 +95,8 @@ function Set-ManifestRegistration {
         New-Item -Path $registryPath -Force | Out-Null
     }
 
-    New-ItemProperty -Path $registryPath -Name "FriendlyName" -PropertyType String -Value "EdoliAddIn" -Force | Out-Null
-    New-ItemProperty -Path $registryPath -Name "Description" -PropertyType String -Value "EdoliAddIn" -Force | Out-Null
+    New-ItemProperty -Path $registryPath -Name "FriendlyName" -PropertyType String -Value "Figoint" -Force | Out-Null
+    New-ItemProperty -Path $registryPath -Name "Description" -PropertyType String -Value "Figoint" -Force | Out-Null
     New-ItemProperty -Path $registryPath -Name "Manifest" -PropertyType String -Value $manifestUri -Force | Out-Null
     New-ItemProperty -Path $registryPath -Name "LoadBehavior" -PropertyType DWord -Value 3 -Force | Out-Null
 
