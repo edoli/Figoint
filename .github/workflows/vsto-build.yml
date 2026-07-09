@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-2025
     
     steps:
     - uses: actions/checkout@v4
@@ -24,6 +24,25 @@ jobs:
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2.0.0
+
+    - name: Locate VSTO targets
+      shell: pwsh
+      run: |
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $vsInstallPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+        if ([string]::IsNullOrWhiteSpace($vsInstallPath)) {
+          throw "Visual Studio with MSBuild was not found."
+        }
+
+        $officeTargets = Get-ChildItem -Path (Join-Path $vsInstallPath "MSBuild\Microsoft\VisualStudio") -Recurse -Filter "Microsoft.VisualStudio.Tools.Office.targets" |
+          Select-Object -First 1
+        if (-not $officeTargets) {
+          throw "Microsoft.VisualStudio.Tools.Office.targets was not found under '$vsInstallPath'."
+        }
+
+        $vstoToolsPath = Split-Path -Path (Split-Path -Path $officeTargets.FullName -Parent) -Parent
+        Add-Content -Path $Env:GITHUB_ENV -Value "VSTOOLS_PATH=$vstoToolsPath"
+        Write-Host "VSTO tools path: $vstoToolsPath"
 
     - name: Restore NuGet packages
       run: nuget restore ${{github.workspace}}\Figoint.sln
@@ -51,7 +70,7 @@ jobs:
       
     - name: Build VSTO
       shell: pwsh
-      run: msbuild ${{github.workspace}}\Figoint.sln -t:rebuild /p:Platform="Any CPU" /p:Configuration="Release" /p:SignManifests=$env:SIGN_MANIFESTS /nologo /nr:false /p:VisualStudioVersion="17.0"
+      run: msbuild ${{github.workspace}}\Figoint.sln -t:rebuild /p:Platform="Any CPU" /p:Configuration="Release" /p:SignManifests=$env:SIGN_MANIFESTS /p:VSToolsPath="$env:VSTOOLS_PATH" /nologo /nr:false
 
 
     - name: Create ZIP file
