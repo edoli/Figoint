@@ -447,6 +447,12 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Include additional build rules for an Office application add-in. -->
   <Import Project="$(VSToolsPath)\OfficeTools\Microsoft.VisualStudio.Tools.Office.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Target Name="CopyVstoResourcesToOutput" AfterTargets="Build">
+    <ItemGroup>
+      <VstoResourceFiles Include="$(MSBuildProjectDirectory)\Resources\*.png" />
+    </ItemGroup>
+    <Copy SourceFiles="@(VstoResourceFiles)" DestinationFolder="$(OutputPath)Resources" SkipUnchangedFiles="true" />
+  </Target>
   <!-- This section defines VSTO properties that describe the host-changeable project properties. -->
   <ProjectExtensions>
     <VisualStudio>
