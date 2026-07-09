@@ -70,7 +70,7 @@ jobs:
       
     - name: Build VSTO
       shell: pwsh
-      run: msbuild ${{github.workspace}}\Figoint.sln -t:rebuild /p:Platform="Any CPU" /p:Configuration="Release" /p:SignManifests=$env:SIGN_MANIFESTS /p:VSToolsPath="$env:VSTOOLS_PATH" /nologo /nr:false
+      run: msbuild ${{github.workspace}}\Figoint.sln -t:Build /p:Platform="Any CPU" /p:Configuration="Release" /p:SignManifests=$env:SIGN_MANIFESTS /p:VSToolsPath="$env:VSTOOLS_PATH" /nologo /nr:false
 
 
     - name: Create ZIP file
