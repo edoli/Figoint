@@ -48,8 +48,9 @@ namespace Figoint
                             var value = new Expression(expr, ExpressiveOptions.IgnoreCaseForParsing).Evaluate();
                             processed = line + (value?.ToString() ?? string.Empty);
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            AppLog.Warn("Failed to evaluate expression line.", ex, "Evaluate expression");
                             processed = line; // if evaluation fails, return original line
                         }
                     }
@@ -61,8 +62,9 @@ namespace Figoint
                             // e.g. "1+2" => "3"
                             processed = new Expression(trimmedLine, ExpressiveOptions.IgnoreCaseForParsing).Evaluate().ToString();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            AppLog.Warn("Failed to evaluate expression line.", ex, "Evaluate expression");
                             processed = line; // if evaluation fails, return original line
                         }
                     }
@@ -125,9 +127,9 @@ namespace Figoint
                             selection.TextRange.Text = replacer(text);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        AppLog.Warn("Failed to replace selected text.", ex, "Replace selected text");
                     }
                 }
             }

@@ -320,6 +320,12 @@ namespace Figoint
                 {
                     var vertices = lineShape.GetVertices();
                     float pixelLength = Vector2.Distance(vertices[0], vertices[1]);
+                    if (pixelLength <= 0)
+                    {
+                        AppLog.Warn("Selected line has no measurable length.", null, "Reset dimension");
+                        System.Windows.Forms.MessageBox.Show("The selected line has no measurable length.", "Figoint");
+                        return;
+                    }
 
                     string text = textShape.TextFrame.TextRange.Text.Trim();
 
@@ -328,7 +334,8 @@ namespace Figoint
 
                     if (value <= 0)
                     {
-                        System.Windows.Forms.MessageBox.Show("텍스트에서 유효한 치수를 찾을 수 없습니다.", "경고");
+                        AppLog.Warn("Could not find a valid dimension value in the selected text.", null, "Reset dimension");
+                        System.Windows.Forms.MessageBox.Show("Could not find a valid dimension value in the selected text.", "Figoint");
                         return;
                     }
 
@@ -347,12 +354,14 @@ namespace Figoint
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("선과 텍스트가 각각 1개씩 선택되어야 합니다.", "경고");
+                    AppLog.Warn("Reset dimension requires one line and one text shape.", null, "Reset dimension");
+                    System.Windows.Forms.MessageBox.Show("Select exactly one line and one text shape.", "Figoint");
                 }
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("선과 텍스트가 각각 1개씩 선택되어야 합니다.", "경고");
+                AppLog.Warn("Reset dimension requires two selected shapes.", null, "Reset dimension");
+                System.Windows.Forms.MessageBox.Show("Select exactly one line and one text shape.", "Figoint");
             }
         }
 

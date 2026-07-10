@@ -378,9 +378,9 @@ namespace Figoint
                     var nearestImage = textbox.FindNearestShape(images, Anchor.None);
                     slide.Shapes.Range(new string[] { textbox.Name, nearestImage.Name }).Group();
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    AppLog.Warn("Failed to group a label with its nearest shape.", ex, "Group labels");
                 }
             }
         }
@@ -423,8 +423,9 @@ namespace Figoint
                 padding = float.Parse(Globals.Ribbons.EdoliRibbon.gridPadding.Text);
                 numColumn = int.Parse(Globals.Ribbons.EdoliRibbon.gridNumColumn.Text);
             }
-            catch
+            catch (Exception ex)
             {
+                AppLog.Warn("Failed to parse align grid settings.", ex, "Align grid");
                 return;
             }
 

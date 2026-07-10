@@ -27,6 +27,8 @@ namespace Figoint
 
         public void WindowSelectionChange(Selection sel)
         {
+            AppCommand.Run("Window selection change", () =>
+        {
             var shapes = Util.ListSelectedShapes();
             String name = "";
             if (shapes.Count > 0)
@@ -53,11 +55,17 @@ namespace Figoint
 #if DEBUG
             DebugTool.OnWindowSelectionChange();
 #endif
+            }, false);
         }
 
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
+            AppCommand.Run("Startup", () =>
+            {
+                AppLog.CleanupOldLogs();
+                AppLog.Info("Figoint add-in started.", "Startup");
+
             KeyboardHook.SetHook();
             this.Application.WindowSelectionChange += new PowerPoint.EApplication_WindowSelectionChangeEventHandler(WindowSelectionChange);
             this.Application.AfterShapeSizeChange += new PowerPoint.EApplication_AfterShapeSizeChangeEventHandler(AfterShapeSizeChange);
@@ -66,11 +74,16 @@ namespace Figoint
 #if DEBUG
             DebugTool.OnStart();
 #endif
+            }, false);
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
+            AppCommand.Run("Shutdown", () =>
+        {
             KeyboardHook.ReleaseHook();
+                AppLog.Info("Figoint add-in stopped.", "Shutdown");
+            }, false);
         }
 
         #region VSTO generated code

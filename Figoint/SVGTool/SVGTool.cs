@@ -1119,14 +1119,18 @@ namespace Figoint
 
         private bool IsShapeTextEmpty(PowerPoint.Shape shape)
         {
+            if (shape.HasTextFrame == MsoTriState.msoFalse)
+            {
+                return true;
+            }
+
             try
             {
-                // TextFrame이 없거나 텍스트가 비어있으면 true 반환
                 return shape.TextFrame.TextRange.Text.Trim() == "";
             }
-            catch
+            catch (Exception ex)
             {
-                // TextFrame에 접근할 수 없는 경우 (예: 선 객체 등) true 반환
+                AppLog.Warn("Failed to read shape text while importing SVG.", ex, "Import SVG");
                 return true;
             }
         }

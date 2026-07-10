@@ -190,6 +190,7 @@
   <ItemGroup>
     <Compile Include="AlignTool.cs" />
     <Compile Include="AnimationTool.cs" />
+    <Compile Include="AppLog.cs" />
     <Compile Include="DebugUtil.cs" />
     <Compile Include="DimensionTool.cs" />
     <Compile Include="EdoliRibbon.cs">

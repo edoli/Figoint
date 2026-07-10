@@ -163,9 +163,9 @@ namespace Figoint
                         shape.Line.BeginArrowheadStyle = MsoArrowheadStyle.msoArrowheadNone;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    AppLog.Warn("Failed to toggle begin arrow for a shape.", ex, "Toggle begin arrow");
                 }
             }
         }
@@ -218,9 +218,9 @@ namespace Figoint
                         shape.Line.EndArrowheadStyle = MsoArrowheadStyle.msoArrowheadNone;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    AppLog.Warn("Failed to toggle end arrow for a shape.", ex, "Toggle end arrow");
                 }
             }
         }
@@ -374,7 +374,8 @@ namespace Figoint
 
             if (connectors.Count == 0)
             {
-                MessageBox.Show("Connector가 없습니다.");
+                AppLog.Warn("No connection sites were found for the selected shapes.", null, "Connect shapes by line");
+                MessageBox.Show("No connection sites were found for the selected shapes.", "Figoint", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -466,7 +467,8 @@ namespace Figoint
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                AppLog.Error("Failed to add path from expression.", ex, "Add path of expression");
+                MessageBox.Show("Could not create a shape from the expression. Please check the input values.", "Figoint", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             return null;
         }
@@ -536,7 +538,8 @@ namespace Figoint
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString());
+                        AppLog.Error("Failed to update path from expression.", ex, "Update path of expression");
+                        MessageBox.Show("Could not update the expression shape. Please check the input values.", "Figoint", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
             }

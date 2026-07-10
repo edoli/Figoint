@@ -147,11 +147,32 @@ namespace Figoint
         public static void SetHook()
         {
             _hookID = SetWindowsHookEx(WH_KEYBOARD, _proc, IntPtr.Zero, (uint)AppDomain.GetCurrentThreadId());
+            if (_hookID == IntPtr.Zero)
+            {
+                AppLog.Warn("Failed to install keyboard hook.", null, "Keyboard hook");
+            }
+            else
+            {
+                AppLog.Debug("Keyboard hook installed.", "Keyboard hook");
+            }
         }
 
         public static void ReleaseHook()
         {
-            UnhookWindowsHookEx(_hookID);
+            if (_hookID == IntPtr.Zero)
+            {
+                return;
+            }
+
+            if (!UnhookWindowsHookEx(_hookID))
+            {
+                AppLog.Warn("Failed to release keyboard hook.", null, "Keyboard hook");
+            }
+            else
+            {
+                AppLog.Debug("Keyboard hook released.", "Keyboard hook");
+                _hookID = IntPtr.Zero;
+            }
         }
 
         private static ulong HiWord(IntPtr ptr)
@@ -164,8 +185,6 @@ namespace Figoint
 
         private static int HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            Console.WriteLine("{0}", nCode);
-
             if (nCode < 0)
             {
                 return (int)CallNextHookEx(_hookID, nCode, wParam, lParam);
@@ -208,52 +227,52 @@ namespace Figoint
                         switch (key)
                         {
                             case VKeys.VK_NUMPAD4:
-                                AlignTool.AlignLeft();
+                                RunShortcut("Align left", () => AlignTool.AlignLeft());
                                 break;
                             case VKeys.VK_NUMPAD6:
-                                AlignTool.AlignRight();
+                                RunShortcut("Align right", () => AlignTool.AlignRight());
                                 break;
                             case VKeys.VK_NUMPAD8:
-                                AlignTool.AlignTop();
+                                RunShortcut("Align top", () => AlignTool.AlignTop());
                                 break;
                             case VKeys.VK_NUMPAD2:
-                                AlignTool.AlignBottom();
+                                RunShortcut("Align bottom", () => AlignTool.AlignBottom());
                                 break;
                             case VKeys.VK_NUMPAD5:
-                                AlignTool.AlignCenter();
+                                RunShortcut("Align center", () => AlignTool.AlignCenter());
                                 break;
                             case VKeys.VK_H:
-                                AlignTool.AlignCenterHorizontal();
+                                RunShortcut("Align center horizontal", () => AlignTool.AlignCenterHorizontal());
                                 break;
                             case VKeys.VK_T:
-                                AlignTool.AlignCenterVertical();
+                                RunShortcut("Align center vertical", () => AlignTool.AlignCenterVertical());
                                 break;
 
                             case VKeys.VK_NUMPAD7:
-                                AlignTool.AlignInRow();
+                                RunShortcut("Align in row", () => AlignTool.AlignInRow());
                                 break;
                             case VKeys.VK_NUMPAD1:
-                                AlignTool.AlignLabels(ShapeExt.Anchor.Bottom);
+                                RunShortcut("Align labels bottom", () => AlignTool.AlignLabels(ShapeExt.Anchor.Bottom));
                                 break;
 
                             case VKeys.VK_ADD:
-                                AlignTool.DistributeVertical();
+                                RunShortcut("Distribute vertical", () => AlignTool.DistributeVertical());
                                 break;
                             case VKeys.VK_SUBTRACT:
-                                AlignTool.DistributeHorizontal();
+                                RunShortcut("Distribute horizontal", () => AlignTool.DistributeHorizontal());
                                 break;
 
                             case VKeys.VK_HOME:
-                                AlignTool.BringToFront();
+                                RunShortcut("Bring to front", () => AlignTool.BringToFront());
                                 break;
                             case VKeys.VK_END:
-                                AlignTool.SendToBack();
+                                RunShortcut("Send to back", () => AlignTool.SendToBack());
                                 break;
                             case VKeys.VK_PAGEUP:
-                                AlignTool.BringForward();
+                                RunShortcut("Bring forward", () => AlignTool.BringForward());
                                 break;
                             case VKeys.VK_PAGEDOWN:
-                                AlignTool.SendBackward();
+                                RunShortcut("Send backward", () => AlignTool.SendBackward());
                                 break;
                         }
                     }
@@ -262,16 +281,16 @@ namespace Figoint
                         switch (key)
                         {
                             case VKeys.VK_NUMPAD4:
-                                AlignTool.AlignLeftOf();
+                                RunShortcut("Align left of", () => AlignTool.AlignLeftOf());
                                 break;
                             case VKeys.VK_NUMPAD6:
-                                AlignTool.AlignRightOf();
+                                RunShortcut("Align right of", () => AlignTool.AlignRightOf());
                                 break;
                             case VKeys.VK_NUMPAD8:
-                                AlignTool.AlignTopOf();
+                                RunShortcut("Align top of", () => AlignTool.AlignTopOf());
                                 break;
                             case VKeys.VK_NUMPAD2:
-                                AlignTool.AlignBottomOf();
+                                RunShortcut("Align bottom of", () => AlignTool.AlignBottomOf());
                                 break;
                         }
                     }
@@ -282,31 +301,31 @@ namespace Figoint
                         switch (key)
                         {
                             case VKeys.VK_1:
-                                AnimationTool.SetNameOfActive("!!ID1");
+                                RunShortcut("Set animation name 1", () => AnimationTool.SetNameOfActive("!!ID1"));
                                 break;
                             case VKeys.VK_2:
-                                AnimationTool.SetNameOfActive("!!ID2");
+                                RunShortcut("Set animation name 2", () => AnimationTool.SetNameOfActive("!!ID2"));
                                 break;
                             case VKeys.VK_3:
-                                AnimationTool.SetNameOfActive("!!ID3");
+                                RunShortcut("Set animation name 3", () => AnimationTool.SetNameOfActive("!!ID3"));
                                 break;
                             case VKeys.VK_4:
-                                AnimationTool.SetNameOfActive("!!ID4");
+                                RunShortcut("Set animation name 4", () => AnimationTool.SetNameOfActive("!!ID4"));
                                 break;
                             case VKeys.VK_5:
-                                AnimationTool.SetNameOfActive("!!ID5");
+                                RunShortcut("Set animation name 5", () => AnimationTool.SetNameOfActive("!!ID5"));
                                 break;
                             case VKeys.VK_6:
-                                AnimationTool.SetNameOfActive("!!ID6");
+                                RunShortcut("Set animation name 6", () => AnimationTool.SetNameOfActive("!!ID6"));
                                 break;
                             case VKeys.VK_7:
-                                AnimationTool.SetNameOfActive("!!ID7");
+                                RunShortcut("Set animation name 7", () => AnimationTool.SetNameOfActive("!!ID7"));
                                 break;
                             case VKeys.VK_8:
-                                AnimationTool.SetNameOfActive("!!ID8");
+                                RunShortcut("Set animation name 8", () => AnimationTool.SetNameOfActive("!!ID8"));
                                 break;
                             case VKeys.VK_9:
-                                AnimationTool.SetNameOfActive("!!ID9");
+                                RunShortcut("Set animation name 9", () => AnimationTool.SetNameOfActive("!!ID9"));
                                 break;
                         }
                     }
@@ -323,19 +342,19 @@ namespace Figoint
                         switch (key)
                         {
                             case VKeys.VK_0:
-                                ShapeTool.ToggleLine();
+                                RunShortcut("Toggle line", () => ShapeTool.ToggleLine());
                                 break;
                             case VKeys.VK_OEM_PLUS:
-                                ShapeTool.ChangeLineWeight(offset);
+                                RunShortcut("Increase line weight", () => ShapeTool.ChangeLineWeight(offset));
                                 break;
                             case VKeys.VK_OEM_MINUS:
-                                ShapeTool.ChangeLineWeight(-offset);
+                                RunShortcut("Decrease line weight", () => ShapeTool.ChangeLineWeight(-offset));
                                 break;
                             case VKeys.VK_OEM_7:
-                                ShapeTool.ChangeLineDash(1);
+                                RunShortcut("Next line dash", () => ShapeTool.ChangeLineDash(1));
                                 break;
                             case VKeys.VK_OEM_1:
-                                ShapeTool.ChangeLineDash(-1);
+                                RunShortcut("Previous line dash", () => ShapeTool.ChangeLineDash(-1));
                                 break;
 
                         }
@@ -347,13 +366,13 @@ namespace Figoint
                         switch (key)
                         {
                             case VKeys.VK_ADD:
-                                TextTool.IncreaseNumber();
+                                RunShortcut("Increase number", () => TextTool.IncreaseNumber());
                                 break;
                             case VKeys.VK_SUBTRACT:
-                                TextTool.DecreaseNumber();
+                                RunShortcut("Decrease number", () => TextTool.DecreaseNumber());
                                 break;
                             case VKeys.VK_DECIMAL:
-                                TextTool.EvaluateExpression();
+                                RunShortcut("Evaluate expression", () => TextTool.EvaluateExpression());
                                 break;
                         }
                     }
@@ -371,6 +390,11 @@ namespace Figoint
 
                 return (int)CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
+        }
+
+        private static void RunShortcut(string operation, Action action)
+        {
+            AppCommand.Run("Shortcut: " + operation, action, false);
         }
 
         [DllImport("user32.dll")]
